@@ -1882,6 +1882,8 @@
     const isOwner = assigneeLower.includes(userLower) || userLower.includes(assigneeLower);
     const isLeader = currentUser.isLeader;
     const isSekdesAdmin = currentUser && currentUser.id === 2;
+    const needApproval = butuhPersetujuanAtasan(t);
+    const canApprove = bolehSahkanTugas(t);
 
     body.innerHTML = `
       <div class="bg-gov-50 border border-gov-200 rounded-xl p-2.5 space-y-1">
@@ -1911,7 +1913,7 @@
           <div class="bg-gov-700 h-2 rounded-full transition-all duration-300" style="width: ${percent}%"></div>
         </div>
         <div class="flex justify-between text-[8px] text-slate-400 font-bold px-0.5">
-          <span>20% (Disposisi)</span><span>40% (Telaah)</span><span>60% (Eksekusi)</span><span>80% (Bukti)</span><span>100% (Pengesahan)</span>
+          <span>20% (Disposisi)</span><span>40% (Telaah)</span><span>60% (Eksekusi)</span><span>80% (Bukti)</span><span>100% (${needApproval ? 'ACC Atasan' : 'Mandiri'})</span>
         </div>
       </div>
 
@@ -1974,6 +1976,29 @@
       </div>
     `;
 
+    let actionBtnHtml = '';
+    if (stageNum === 5) {
+      actionBtnHtml = `<span class="text-[9px] text-emerald-700 font-bold self-center px-2">Tugas Telah 100% Sah</span>`;
+    } else if (canApprove) {
+      actionBtnHtml = `
+        <button onclick="parafPengesahanPimpinan(${t.id})" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 rounded-xl text-xs shadow flex items-center justify-center space-x-1">
+          <i class="fa-solid fa-signature text-[10px]"></i><span>Sahkan / Validasi 100%</span>
+        </button>
+      `;
+    } else if (isOwner && stageNum === 4 && needApproval) {
+      actionBtnHtml = `
+        <span class="text-[9px] bg-amber-100 text-amber-800 border border-amber-300 font-bold px-2.5 py-1.5 rounded-xl text-center">
+          <i class="fa-solid fa-hourglass-half mr-1"></i>Menunggu ACC Atasan
+        </span>
+      `;
+    } else if (isOwner) {
+      actionBtnHtml = `
+        <button onclick="tutupUnitDetailModal(); pindahKeAlur(${t.id});" class="flex-1 bg-gov-700 hover:bg-gov-800 text-white font-bold py-1.5 rounded-xl text-xs shadow flex items-center justify-center space-x-1">
+          <i class="fa-solid fa-forward-step text-[10px]"></i><span>Update Alur Sekarang</span>
+        </button>
+      `;
+    }
+
     footer.innerHTML = `
       ${isSekdesAdmin ? `
         <button type="button" onclick="bukaModalHapus(${t.id})" class="btn-detail-del bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 font-bold py-1.5 px-3 rounded-xl text-xs flex items-center justify-center space-x-1 transition">
@@ -1981,27 +2006,20 @@
         </button>
       ` : ''}
       <button onclick="tutupUnitDetailModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-1.5 rounded-xl text-xs">Tutup</button>
-      ${isLeader && stageNum < 5 ? `
-        <button onclick="parafPengesahanPimpinan(${t.id})" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 rounded-xl text-xs shadow flex items-center justify-center space-x-1">
-          <i class="fa-solid fa-signature text-[10px]"></i><span>Sahkan / Validasi 100%</span>
-        </button>
-      ` : (isOwner && stageNum < 5 ? `
-        <button onclick="tutupUnitDetailModal(); pindahKeAlur(${t.id});" class="flex-1 bg-gov-700 hover:bg-gov-800 text-white font-bold py-1.5 rounded-xl text-xs shadow flex items-center justify-center space-x-1">
-          <i class="fa-solid fa-forward-step text-[10px]"></i><span>Update Alur Sekarang</span>
-        </button>
-      ` : '<span class="text-[9px] text-emerald-700 font-bold self-center px-2">Tugas Telah 100% Sah</span>')}
+      ${actionBtnHtml}
     `;
 
     document.getElementById('modal-unit-detail').classList.remove('hidden');
   }
 
-  function tutupUnitDetailModal() {
-    document.getElementById('modal-unit-detail').classList.add('hidden');
-  }
-
   function parafPengesahanPimpinan(taskId) {
     const t = TASKS.find(x => Number(x.id) === Number(taskId));
     if (!t) return;
+    if (!bolehSahkanTugas(t)) {
+      showToast("Anda tidak memiliki otoritas mengesahkan tugas ini.");
+      return;
+    }
+
     t.stage = 5;
     t.progress = "100%";
     if (!t.completedAt) t.completedAt = Date.now();
