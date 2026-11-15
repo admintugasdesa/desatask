@@ -154,7 +154,7 @@
 
         <div class="bg-gov-50 border border-gov-200 rounded-lg p-2 space-y-1 text-[10px]">
           <div class="flex items-center justify-between">
-            <span id="alur-badge-code" class="bg-gov-700 text-white font-extrabold px-1.5 py-0.2 rounded text-[9px]">TGS-000</span>
+            <span id="alur-badge-code" class="bg-gov-700 text-white font-extrabold px-1.5 py-0.2 rounded text-[9px]">-</span>
             <span id="alur-deadline" class="text-gov-800 font-bold"><i class="fa-regular fa-clock mr-1"></i>Tenggat: -</span>
           </div>
           <div class="flex items-center justify-between text-slate-600 pt-0.5">
@@ -174,7 +174,7 @@
       </div>
 
       <!-- FORM BUKTI & CATATAN -->
-      <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-xs space-y-2.5">
+      <div id="alur-form-container" class="bg-white border border-slate-200 rounded-xl p-3 shadow-xs space-y-2.5">
         <h3 class="font-extrabold text-xs text-slate-800 flex items-center">
           <i class="fa-solid fa-camera text-gov-700 mr-1.5"></i>Laporan Progres & Bukti Lapangan
         </h3>
@@ -184,12 +184,12 @@
         <div id="alur-stage-photos-preview"></div>
 
         <div class="grid grid-cols-2 gap-2">
-          <label class="bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-[10px] py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 cursor-pointer transition">
+          <label id="label-foto-upload" class="bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-[10px] py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 cursor-pointer transition">
             <i class="fa-solid fa-camera text-gov-700"></i>
             <span>Ambil / Pilih Foto</span>
-            <input type="file" accept="image/*" capture="environment" onchange="handleFotoUpload(event)" class="hidden">
+            <input id="alur-foto-input" type="file" accept="image/*" onchange="handleFotoUpload(event)" class="hidden">
           </label>
-          <button type="button" onclick="simpanCatatanAlur()" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-gov-800 font-bold text-[10px] py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition">
+          <button id="btn-simpan-catatan" type="button" onclick="simpanCatatanAlur()" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-gov-800 font-bold text-[10px] py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition">
             <i class="fa-solid fa-floppy-disk"></i>
             <span>Simpan Catatan</span>
           </button>
@@ -468,7 +468,7 @@
   // ENGINE PENYIMPANAN GOOGLE DRIVE (VIA GOOGLE APPS SCRIPT)
   // ==============================================================
   const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwKldHppcO-2AZ4e_B3vS86BF1U_WUGoOWe8TdVt6eIwY7fyAl62DqYyk2CIAuYcq_eqg/exec";
-  const LS_TASKS_KEY = 'desatask_sumengko_tasks_v1';
+  const LS_TASKS_KEY = 'desatask_sumengko_tasks_v2';
   const LS_USER_KEY = 'desatask_sumengko_user_id_v1';
 
   // 1. DATA MASTER 11 APARATUR PEMDES SUMENGKO
@@ -495,269 +495,31 @@
     { step: 5, title: "Pengesahan Pimpinan", percent: "100%", desc: "Validasi penuh tanda tangan digital Kepala Desa / Sekdes." }
   ];
 
-  // 3. DATA BAWAAN AWAL (SEED DATA)
-  const DEFAULT_TASKS = [
-    {
-      id: 1004,
-      code: "TGS-2025-004",
-      title: "Penyusunan Laporan Pertanggungjawaban Realisasi APBDes Triwulan I",
-      creator: "Herman Dwi Novianto, ST (Sekdes)",
-      assignee: "Naning Lestari",
-      category: "kades",
-      priority: "Tinggi",
-      deadline: "2 Hari lagi (15.00 WIB)",
-      stage: 2,
-      progress: "40%",
-      desc: "Rekonsiliasi buku kas pembantu, pajak PPN/PPh, serta rekap nota belanja modal sarana prasarana.",
-      location: "Ruang Kaur Keuangan Balai Desa",
-      lastUpdated: "Hari ini, 09.30 WIB",
-      hasProof: true,
-      proofNote: "Buku kas umum & rekening koran BPD Jatim telah dicocokkan bersama bendahara.",
-      proofImg: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=700&q=80",
-      leaderFeedback: "",
-      history: [
-        { time: "Kemarin, 08:15 WIB", actor: "Herman Dwi Novianto, ST", note: "Disposisi resmi diterbitkan untuk Kaur Keuangan.", stage: 1 },
-        { time: "Hari ini, 09:30 WIB", actor: "Naning Lestari", note: "Pengecekan nota pembantu dan print rekening koran bank Jatim rampung.", stage: 2 }
-      ]
-    },
-    {
-      id: 1005,
-      code: "TGS-2025-005",
-      title: "Verifikasi Berkas Pencairan BLT Dana Desa Tahap 1",
-      creator: "Herman Dwi Novianto, ST (Sekdes)",
-      assignee: "Naning Lestari",
-      category: "kades",
-      priority: "Normal",
-      deadline: "Besok (12.00 WIB)",
-      stage: 1,
-      progress: "20%",
-      desc: "Periksa kelengkapan SPJ dan presensi penerima manfaat BLT-DD Dusun Blok A & B.",
-      location: "Balai Desa Sumengko",
-      lastUpdated: "Hari ini, 08.00 WIB",
-      hasProof: false,
-      proofNote: "",
-      proofImg: "",
-      leaderFeedback: "",
-      history: [
-        { time: "Hari ini, 08:00 WIB", actor: "Herman Dwi Novianto, ST", note: "Instruksi verifikasi berkas pencairan BLT-DD.", stage: 1 }
-      ]
-    },
-    {
-      id: 9001,
-      code: "TGS-2025-048",
-      title: "Pendataan Fisik Saluran Drainase Dusun Blok A",
-      creator: "Herman Dwi Novianto, ST (Sekdes)",
-      assignee: "Bowo Witono",
-      category: "kades",
-      priority: "Tinggi",
-      deadline: "Hari ini (17.00 WIB)",
-      stage: 3,
-      progress: "60%",
-      desc: "Pengambilan dokumentasi geolokasi GPS lapangan dan pengukuran debit saluran sawah warga.",
-      location: "Dusun Krajan Blok A, Kwadungan",
-      lastUpdated: "Hari ini, 10.45 WIB",
-      hasProof: true,
-      proofNote: "Foto gorong-gorong RT 02 terdokumentasi, debit lancar.",
-      proofImg: "https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=700&q=80",
-      leaderFeedback: "Lanjutkan cek ke perbatasan Dusun Blok B.",
-      history: [
-        { time: "Kemarin, 14:00 WIB", actor: "Herman Dwi Novianto, ST", note: "Instruksi survei cek drainase musim hujan.", stage: 1 },
-        { time: "Hari ini, 08:30 WIB", actor: "Bowo Witono", note: "Persiapan meteran roll dan GPS koordinat ponsel.", stage: 2 },
-        { time: "Hari ini, 10:45 WIB", actor: "Bowo Witono", note: "Survei RT 02 selesai, debit air stabil, foto diunggah.", stage: 3 }
-      ]
-    },
-    {
-      id: 2001,
-      code: "TGS-2025-010",
-      title: "Harmonisasi Draf Regulasi Batas Teritori Dusun",
-      creator: "Drs. H. SUMARLI, M.Ag",
-      assignee: "Herman Dwi Novianto, ST",
-      category: "kades",
-      priority: "Tinggi",
-      deadline: "Besok (16.00 WIB)",
-      stage: 3,
-      progress: "60%",
-      desc: "Koordinasi dengan Bagian Hukum Setda Ngawi perihal batas pemukiman warga.",
-      location: "Ruang Sekretariat Desa",
-      lastUpdated: "Hari ini, 11.15 WIB",
-      hasProof: true,
-      proofNote: "Draf pasal 4 telah direvisi bersama staf Bagian Hukum.",
-      proofImg: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=700&q=80",
-      leaderFeedback: "",
-      history: [
-        { time: "Kemarin, 10:00 WIB", actor: "Drs. H. SUMARLI, M.Ag", note: "Penerbitan arahan harmonisasi aturan perdes.", stage: 1 },
-        { time: "Hari ini, 11:15 WIB", actor: "Herman Dwi Novianto, ST", note: "Konsultasi hukum selesai 60%.", stage: 3 }
-      ]
-    },
-    {
-      id: 4001,
-      code: "TGS-2025-018",
-      title: "Digitalisasi Arsip Buku Agenda Surat Masuk/Keluar",
-      creator: "Herman Dwi Novianto, ST (Sekdes)",
-      assignee: "Galuh Rismawati, SE",
-      category: "mandiri",
-      priority: "Normal",
-      deadline: "Lusa (14.00 WIB)",
-      stage: 4,
-      progress: "80%",
-      desc: "Scan seluruh berkas nota dinas masuk triwulan I ke format PDF drive desa.",
-      location: "Ruang Pelayanan",
-      lastUpdated: "Hari ini, 09.00 WIB",
-      hasProof: true,
-      proofNote: "78 lembar surat masuk sudah terscan rapi dalam drive.",
-      proofImg: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=700&q=80",
-      leaderFeedback: "",
-      history: [
-        { time: "Kemarin, 13:00 WIB", actor: "Galuh Rismawati, SE", note: "Pemindaian berkas dimulai.", stage: 2 },
-        { time: "Hari ini, 09:00 WIB", actor: "Galuh Rismawati, SE", note: "Unggah dokumen 80%, menunggu verifikasi Sekdes.", stage: 4 }
-      ]
-    },
-    {
-      id: 5001,
-      code: "TGS-2025-025",
-      title: "Penyusunan Draf Matriks RKP 2026",
-      creator: "Notulen Rapat Musdes",
-      assignee: "Ramli Nur Aziza",
-      category: "notulen",
-      priority: "Tinggi",
-      deadline: "3 Hari lagi (16.00 WIB)",
-      stage: 2,
-      progress: "40%",
-      desc: "Kompilasi usulan prioritas pertanian dan infrastruktur dari musrenbangdus.",
-      location: "Ruang BPD",
-      lastUpdated: "Hari ini, 08.45 WIB",
-      hasProof: false,
-      proofNote: "Tabulasi usulan sedang dikelompokkan.",
-      proofImg: "",
-      leaderFeedback: "",
-      history: [
-        { time: "Kemarin, 09:00 WIB", actor: "Musdes", note: "Notulen disahkan bersama BPD.", stage: 1 },
-        { time: "Hari ini, 08:45 WIB", actor: "Ramli Nur Aziza", note: "Tabulasi usulan dimulai.", stage: 2 }
-      ]
-    },
-    {
-      id: 6001,
-      code: "TGS-2025-031",
-      title: "Pembaruan Profil Kependudukan & PBB-P2",
-      creator: "Herman Dwi Novianto, ST (Sekdes)",
-      assignee: "Lugas Khalid Maulana",
-      category: "kades",
-      priority: "Normal",
-      deadline: "4 Hari lagi",
-      stage: 1,
-      progress: "20%",
-      desc: "Pencocokan data NIK ganda dan sinkronisasi SPPT dengan Kantor Pajak Ngawi.",
-      location: "Kecamatan Kwadungan",
-      lastUpdated: "Hari ini, 07.45 WIB",
-      hasProof: false,
-      proofNote: "",
-      proofImg: "",
-      leaderFeedback: "",
-      history: [
-        { time: "Hari ini, 07:45 WIB", actor: "Herman Dwi Novianto, ST", note: "Disposisi sinkronisasi data NIK.", stage: 1 }
-      ]
-    },
-    {
-      id: 7001,
-      code: "TGS-2025-037",
-      title: "Monitoring Pendistribusian PMT Balita Stunting",
-      creator: "Notulen Rapat Rembug Stunting",
-      assignee: "Puspita Sari Handayani, SE",
-      category: "notulen",
-      priority: "Tinggi",
-      deadline: "Besok (10.00 WIB)",
-      stage: 5,
-      progress: "100%",
-      desc: "Penyaluran telur dan vitamin gizi balita serta input aplikasi EHDW Kemendes.",
-      location: "Poskesdes Sumengko",
-      lastUpdated: "Hari ini, 11.30 WIB",
-      hasProof: true,
-      proofNote: "100% PMT tersalurkan kepada 14 balita target.",
-      proofImg: "https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=700&q=80",
-      leaderFeedback: "Sangat baik. Laporan disahkan 100%.",
-      history: [
-        { time: "Kemarin", actor: "Puspita Sari Handayani, SE", note: "Penyaluran serentak di posyandu.", stage: 4 },
-        { time: "Hari ini, 11:30 WIB", actor: "Drs. H. SUMARLI, M.Ag", note: "Pengesahan digital selesai penuh (100%).", stage: 5 }
-      ]
-    },
-    {
-      id: 8001,
-      code: "TGS-2025-042",
-      title: "Pelayanan Surat Keterangan Domisili Online",
-      creator: "Inisiatif Mandiri",
-      assignee: "Shoim Syah",
-      category: "mandiri",
-      priority: "Rutin",
-      deadline: "Hari ini (15.00 WIB)",
-      stage: 3,
-      progress: "60%",
-      desc: "Pelayanan registrasi administrasi pemohon surat keterangan beasiswa.",
-      location: "Loket Pelayanan",
-      lastUpdated: "Hari ini, 10.10 WIB",
-      hasProof: true,
-      proofNote: "10 berkas teregister ke buku besar.",
-      proofImg: "",
-      leaderFeedback: "",
-      history: [
-        { time: "Pagi tadi", actor: "Shoim Syah", note: "Mulai layanan administrasi.", stage: 1 },
-        { time: "Hari ini, 10:10 WIB", actor: "Shoim Syah", note: "10 berkas terlayani.", stage: 3 }
-      ]
-    },
-    {
-      id: 10001,
-      code: "TGS-2025-055",
-      title: "Pengawasan Patok Batas Tanah Kas Desa Dusun Blok B",
-      creator: "Drs. H. SUMARLI, M.Ag",
-      assignee: "Agus Setiawan, Spd",
-      category: "kades",
-      priority: "Normal",
-      deadline: "Lusa (16.00 WIB)",
-      stage: 2,
-      progress: "40%",
-      desc: "Pengecekan fisik batas lahan sewa bengkok dan koordinasi dengan penyewa lahan tani.",
-      location: "Blok B Sawah Kulon",
-      lastUpdated: "Kemarin, 16.00 WIB",
-      hasProof: false,
-      proofNote: "Penyewa sudah dihubungi.",
-      proofImg: "",
-      leaderFeedback: "",
-      history: [
-        { time: "Kemarin, 16:00 WIB", actor: "Drs. H. SUMARLI, M.Ag", note: "Instruksi tertib batas aset tanah kas desa.", stage: 1 }
-      ]
-    },
-    {
-      id: 11001,
-      code: "TGS-2025-061",
-      title: "Sosialisasi Kerja Bakti Saluran Irigasi Blok C",
-      creator: "Inisiatif Mandiri",
-      assignee: "Ugeng Budi Prasetyo",
-      category: "mandiri",
-      priority: "Normal",
-      deadline: "Besok (19.00 WIB)",
-      stage: 1,
-      progress: "20%",
-      desc: "Penyampaian surat edaran gotong royong kepada Ketua RT 01-04 Dusun Blok C.",
-      location: "Dusun Blok C",
-      lastUpdated: "Hari ini, 09.15 WIB",
-      hasProof: false,
-      proofNote: "",
-      proofImg: "",
-      leaderFeedback: "",
-      history: [
-        { time: "Hari ini, 09:15 WIB", actor: "Ugeng Budi Prasetyo", note: "Draf pengumuman dibuat di grup RT.", stage: 1 }
-      ]
-    }
-  ];
+  // 3. DATA BAWAAN AWAL KOSONG
+  const DEFAULT_TASKS = [];
 
   // ==============================================================
   // FUNGSI SINKRONISASI GOOGLE DRIVE (APPS SCRIPT) + LOCALSTORAGE
   // ==============================================================
+  let lastLocalMutationTime = 0;
+
+  function normalizeTask(t) {
+    return {
+      ...t,
+      id: Number(t.id),
+      stage: Number(t.stage) || 1,
+      history: Array.isArray(t.history) ? t.history : []
+    };
+  }
+
   function loadTasksFromLocal() {
     try {
       const saved = localStorage.getItem(LS_TASKS_KEY);
-      if (saved) {
+      if (saved !== null) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed.map(normalizeTask);
+        }
       }
     } catch (e) {
       console.error("Gagal membaca localStorage:", e);
@@ -774,6 +536,7 @@
   }
 
   async function syncSingleTaskToCloud(task) {
+    lastLocalMutationTime = Date.now();
     saveTasksToLocal();
     if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
 
@@ -785,7 +548,7 @@
       });
       const result = await response.json();
       if (result.status === 'ok' && Array.isArray(result.tasks)) {
-        TASKS = result.tasks;
+        TASKS = result.tasks.map(normalizeTask);
         saveTasksToLocal();
         renderUserTaskList();
         renderAlurView(activeTaskId);
@@ -798,15 +561,24 @@
   }
 
   async function deleteSingleTaskFromCloud(taskId) {
+    lastLocalMutationTime = Date.now();
     saveTasksToLocal();
     if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
 
     try {
-      await fetch(GAS_WEB_APP_URL, {
+      const response = await fetch(GAS_WEB_APP_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'delete', taskId: taskId })
+        body: JSON.stringify({ action: 'delete', taskId: Number(taskId) })
       });
+      const result = await response.json();
+      if (result.status === 'ok' && Array.isArray(result.tasks)) {
+        TASKS = result.tasks.map(normalizeTask);
+        saveTasksToLocal();
+        renderUserTaskList();
+        renderAlurView(activeTaskId);
+        renderMonitoringView();
+      }
     } catch (err) {
       console.warn("Gagal menghapus di Google Drive:", err);
     }
@@ -816,22 +588,22 @@
     if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
 
     const fetchFromDrive = async () => {
+      // Hindari menimpa data lokal jika baru saja melakukan perubahan (< 8 detik)
+      if (Date.now() - lastLocalMutationTime < 8000) return;
+
       try {
         const res = await fetch(GAS_WEB_APP_URL);
         const cloudTasks = await res.json();
 
-        if (Array.isArray(cloudTasks) && cloudTasks.length === 0) {
-          await fetch(GAS_WEB_APP_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'seed', tasks: TASKS })
-          });
-          return;
-        }
-
-        if (Array.isArray(cloudTasks) && cloudTasks.length > 0) {
-          TASKS = cloudTasks;
+        if (Array.isArray(cloudTasks)) {
+          TASKS = cloudTasks.map(normalizeTask);
           saveTasksToLocal();
+
+          const userTasks = getUserTasks();
+          if (!activeTaskId || !userTasks.some(t => Number(t.id) === Number(activeTaskId))) {
+            activeTaskId = userTasks.length > 0 ? Number(userTasks[0].id) : null;
+          }
+
           renderUserTaskList();
           renderAlurView(activeTaskId);
           renderMonitoringView();
@@ -860,7 +632,7 @@
   // Inisialisasi
   window.addEventListener('DOMContentLoaded', () => {
     const initialUserTasks = getUserTasks();
-    activeTaskId = initialUserTasks.length > 0 ? initialUserTasks[0].id : (TASKS[0]?.id || null);
+    activeTaskId = initialUserTasks.length > 0 ? Number(initialUserTasks[0].id) : null;
 
     updateHeaderUI();
     renderAparaturModal();
@@ -894,33 +666,13 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Filter Tugas Akun Aktif
+  // Filter Tugas Akun Aktif (tanpa data palsu saat kosong)
   function getUserTasks() {
     const nameLower = currentUser.nama.toLowerCase();
-    const list = TASKS.filter(t => t.assignee.toLowerCase().includes(nameLower) || nameLower.includes(t.assignee.toLowerCase()));
-    if (list.length === 0) {
-      return [{
-        id: 9999,
-        code: "TGS-2025-099",
-        title: "Tugas Rutin Kedinasan " + currentUser.jabatan,
-        creator: "Pemdes Sumengko",
-        assignee: currentUser.nama,
-        category: "mandiri",
-        priority: "Normal",
-        deadline: "Hari ini (17.00 WIB)",
-        stage: 2,
-        progress: "40%",
-        desc: "Pelaksanaan operasional kedinasan sesuai tupoksi.",
-        location: "Balai Desa Sumengko",
-        lastUpdated: "Hari ini",
-        hasProof: false,
-        proofNote: "Sedang dikerjakan.",
-        proofImg: "",
-        leaderFeedback: "",
-        history: [{ time: "Pagi tadi", actor: currentUser.nama, note: "Mulai dinas harian.", stage: 2 }]
-      }];
-    }
-    return list;
+    return TASKS.filter(t => {
+      const assigneeLower = (t.assignee || '').toLowerCase();
+      return assigneeLower.includes(nameLower) || nameLower.includes(assigneeLower);
+    });
   }
 
   // Render Tab 1: Tugas Saya
@@ -930,8 +682,8 @@
 
     let pending = 0, process = 0, done = 0;
     tasks.forEach(t => {
-      if (t.stage === 1) pending++;
-      else if (t.stage === 5) done++;
+      if (Number(t.stage) === 1) pending++;
+      else if (Number(t.stage) === 5) done++;
       else process++;
     });
 
@@ -941,11 +693,24 @@
     document.getElementById('txt-owner-name').innerText = currentUser.nama;
 
     if (!container) return;
+
+    if (tasks.length === 0) {
+      container.innerHTML = `
+        <div class="bg-white border border-slate-200 rounded-xl p-6 text-center text-slate-400 space-y-1.5 shadow-xs">
+          <i class="fa-regular fa-folder-open text-2xl text-slate-300"></i>
+          <p class="text-xs font-bold text-slate-600">Belum ada tugas aktif</p>
+          <p class="text-[10px]">Klik tombol <strong>+ Tugas Baru</strong> di atas untuk menambahkan tugas.</p>
+        </div>
+      `;
+      return;
+    }
+
     container.innerHTML = tasks.map(t => {
+      const stageNum = Number(t.stage) || 1;
       const isUrgent = t.priority === 'Tinggi';
       const colorBar = isUrgent ? 'bg-red-500' : 'bg-gov-700';
       const isSekdes = t.creator && t.creator.includes('Herman');
-      const percent = t.stage * 20;
+      const percent = stageNum * 20;
 
       return `
         <div class="user-task-card bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs relative overflow-hidden transition hover:border-gov-600" data-cat="${t.category}">
@@ -957,8 +722,8 @@
                 <span class="text-[8px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">${t.code}</span>
                 ${isSekdes ? '<span class="text-[8px] bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.2 rounded"><i class="fa-solid fa-paper-plane mr-1 text-[7px]"></i>Dari Sekdes Herman</span>' : ''}
               </div>
-              <span class="text-[8px] font-extrabold ${t.stage === 5 ? 'bg-emerald-100 text-emerald-800' : 'bg-gov-50 text-gov-700 border border-gov-200'} px-2 py-0.5 rounded-full">
-                Tahap ${t.stage}/5 (${t.progress})
+              <span class="text-[8px] font-extrabold ${stageNum === 5 ? 'bg-emerald-100 text-emerald-800' : 'bg-gov-50 text-gov-700 border border-gov-200'} px-2 py-0.5 rounded-full">
+                Tahap ${stageNum}/5 (${t.progress})
               </span>
             </div>
 
@@ -967,7 +732,7 @@
             </h4>
             <div class="mt-0.5 flex items-center justify-between text-[10px] text-slate-500">
               <span>Pemberi: <strong class="text-slate-700 font-semibold">${t.creator}</strong></span>
-              <span class="text-gov-800 font-bold">Tahap: ${SOP_STEPS[t.stage-1].title.split('&')[0]}</span>
+              <span class="text-gov-800 font-bold">Tahap: ${SOP_STEPS[stageNum - 1].title.split('&')[0]}</span>
             </div>
 
             <div class="w-full bg-slate-100 h-1.5 rounded-full mt-1.5 overflow-hidden">
@@ -1001,49 +766,76 @@
 
   // Tab 2: Update Alur
   function pindahKeAlur(taskId) {
-    activeTaskId = parseInt(taskId, 10);
+    activeTaskId = Number(taskId);
     switchTab('alur');
     renderAlurView(activeTaskId);
   }
 
   function gantiTugasAlur(taskId) {
-    activeTaskId = parseInt(taskId, 10);
+    activeTaskId = Number(taskId);
     renderAlurView(activeTaskId);
-    showToast("Tugas dialihkan ke kode: " + (TASKS.find(t => t.id === activeTaskId)?.code || ""));
+    const found = TASKS.find(t => Number(t.id) === activeTaskId);
+    if (found) showToast("Tugas dialihkan ke kode: " + found.code);
   }
 
   function renderAlurView(selectedId = null) {
     const tasks = getUserTasks();
     const sel = document.getElementById('alur-task-select');
+    const stepperBox = document.getElementById('alur-stepper-box');
+    const formContainer = document.getElementById('alur-form-container');
     if (!sel) return;
 
     if (tasks.length === 0) {
-      sel.innerHTML = `<option value="">Belum ada tugas</option>`;
+      activeTaskId = null;
+      sel.innerHTML = `<option value="">-- Belum ada tugas untuk dikerjakan --</option>`;
+      sel.disabled = true;
+      document.getElementById('alur-badge-code').innerText = "-";
+      document.getElementById('alur-creator').innerText = "-";
+      document.getElementById('alur-assignee').innerText = currentUser.nama;
+      document.getElementById('alur-progress').innerText = "-";
+      document.getElementById('alur-deadline').innerHTML = `<i class="fa-regular fa-clock mr-1"></i>Tenggat: -`;
+
+      if (stepperBox) {
+        stepperBox.innerHTML = `
+          <div class="text-center py-4 text-slate-400 space-y-1 -ml-5">
+            <i class="fa-solid fa-clipboard-question text-xl text-slate-300"></i>
+            <p class="text-xs font-bold text-slate-600">Belum ada tugas tersedia</p>
+            <p class="text-[10px]">Buat tugas baru di tab <strong>Tugas Saya</strong> untuk mulai memperbarui alur & mengunggah foto.</p>
+          </div>
+        `;
+      }
+      if (formContainer) formContainer.classList.add('opacity-50', 'pointer-events-none');
       return;
     }
 
-    if (!selectedId || !tasks.some(t => t.id === selectedId)) {
-      selectedId = tasks[0].id;
+    sel.disabled = false;
+    if (formContainer) formContainer.classList.remove('opacity-50', 'pointer-events-none');
+
+    const parsedSelected = selectedId !== null ? Number(selectedId) : null;
+    if (!parsedSelected || !tasks.some(t => Number(t.id) === parsedSelected)) {
+      activeTaskId = Number(tasks[0].id);
+    } else {
+      activeTaskId = parsedSelected;
     }
-    activeTaskId = selectedId;
 
     sel.innerHTML = tasks.map(t => `
-      <option value="${t.id}" ${t.id === activeTaskId ? 'selected' : ''}>
+      <option value="${t.id}" ${Number(t.id) === activeTaskId ? 'selected' : ''}>
         ${t.code} - ${t.title} (${t.progress})
       </option>
     `).join('');
 
-    const t = TASKS.find(x => x.id === activeTaskId) || tasks[0];
+    const t = TASKS.find(x => Number(x.id) === activeTaskId) || tasks[0];
+    const stageNum = Number(t.stage) || 1;
+
     document.getElementById('alur-badge-code').innerText = t.code;
     document.getElementById('alur-creator').innerText = t.creator;
     document.getElementById('alur-assignee').innerText = t.assignee;
-    document.getElementById('alur-progress').innerText = `Tahap ${t.stage} (${t.progress})`;
+    document.getElementById('alur-progress').innerText = `Tahap ${stageNum} (${t.progress})`;
     document.getElementById('alur-deadline').innerHTML = `<i class="fa-regular fa-clock mr-1"></i>Tenggat: ${t.deadline}`;
 
-    const stepperBox = document.getElementById('alur-stepper-box');
     stepperBox.innerHTML = SOP_STEPS.map(s => {
-      const isDone = s.step < t.stage;
-      const isCurrent = s.step === t.stage;
+      const isDone = s.step < stageNum;
+      const isCurrent = s.step === stageNum;
 
       let circleClass = "bg-slate-200 border-slate-300 text-slate-600";
       let cardBg = "bg-slate-50 border-slate-200";
@@ -1085,7 +877,7 @@
     if (photoPreview) {
       photoPreview.innerHTML = t.proofImg ? `
         <div class="relative rounded-lg overflow-hidden border border-emerald-300 bg-slate-50">
-          <img src="${t.proofImg}" class="w-full h-24 object-cover" alt="Bukti Terlampir"/>
+          <img src="${t.proofImg}" class="w-full h-32 object-cover" alt="Bukti Terlampir"/>
           <span class="absolute bottom-1 right-1 bg-emerald-700/90 text-white text-[8px] px-1.5 py-0.5 rounded font-bold">Bukti Tersimpan</span>
         </div>
       ` : '';
@@ -1093,8 +885,8 @@
 
     const btnNaik = document.getElementById('btn-naik-tahap');
     const labelNaik = document.getElementById('btn-naik-label');
-    if (t.stage < 5) {
-      const nextNum = t.stage + 1;
+    if (stageNum < 5) {
+      const nextNum = stageNum + 1;
       labelNaik.innerText = `Tingkatkan ke Tahap ${nextNum}: ${SOP_STEPS[nextNum - 1].title}`;
       btnNaik.className = "w-full bg-gov-700 hover:bg-gov-800 text-white font-extrabold py-3 rounded-xl shadow flex items-center justify-center space-x-2 transition text-xs";
     } else {
@@ -1104,11 +896,17 @@
   }
 
   function eksekusiNaikTahap() {
-    const t = TASKS.find(x => x.id === activeTaskId);
-    if (!t) return;
+    const selVal = document.getElementById('alur-task-select')?.value;
+    const targetId = Number(selVal || activeTaskId);
+    const t = TASKS.find(x => Number(x.id) === targetId);
+    if (!t) {
+      showToast("Pilih tugas terlebih dahulu.");
+      return;
+    }
 
-    if (t.stage < 5) {
-      t.stage += 1;
+    const currentStage = Number(t.stage) || 1;
+    if (currentStage < 5) {
+      t.stage = currentStage + 1;
       t.progress = (t.stage * 20) + '%';
       t.hasProof = true;
       t.lastUpdated = "Baru saja (" + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB)";
@@ -1117,7 +915,7 @@
       const note = (noteVal && noteVal.trim()) ? noteVal.trim() : `Progres ditingkatkan ke Tahap ${t.stage}: ${SOP_STEPS[t.stage - 1].title}`;
       t.proofNote = note;
 
-      if (!t.history) t.history = [];
+      if (!Array.isArray(t.history)) t.history = [];
       t.history.push({
         time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
         actor: currentUser.nama + ` (${currentUser.jabatan})`,
@@ -1136,43 +934,51 @@
   }
 
   function lompatKeTahap(stepNum) {
-    const t = TASKS.find(x => x.id === activeTaskId);
+    const selVal = document.getElementById('alur-task-select')?.value;
+    const targetId = Number(selVal || activeTaskId);
+    const t = TASKS.find(x => Number(x.id) === targetId);
     if (!t) return;
-    t.stage = stepNum;
-    t.progress = (stepNum * 20) + '%';
+
+    t.stage = Number(stepNum);
+    t.progress = (t.stage * 20) + '%';
     t.hasProof = true;
     t.lastUpdated = "Baru saja (" + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB)";
 
-    const note = `Pelaksana beralih ke Tahap ${stepNum}: ${SOP_STEPS[stepNum - 1].title}`;
-    if (!t.history) t.history = [];
+    const note = `Pelaksana beralih ke Tahap ${t.stage}: ${SOP_STEPS[t.stage - 1].title}`;
+    if (!Array.isArray(t.history)) t.history = [];
     t.history.push({
       time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
       actor: currentUser.nama + ` (${currentUser.jabatan})`,
       note: note,
-      stage: stepNum
+      stage: t.stage
     });
 
     syncSingleTaskToCloud(t);
     renderAlurView(t.id);
     renderUserTaskList();
     renderMonitoringView();
-    showToast(`Beralih ke Tahap ${stepNum} & tersimpan.`);
+    showToast(`Beralih ke Tahap ${t.stage} & tersimpan.`);
   }
 
   function simpanCatatanAlur() {
-    const t = TASKS.find(x => x.id === activeTaskId);
-    if (!t) return;
+    const selVal = document.getElementById('alur-task-select')?.value;
+    const targetId = Number(selVal || activeTaskId);
+    const t = TASKS.find(x => Number(x.id) === targetId);
+    if (!t) {
+      showToast("Pilih tugas terlebih dahulu.");
+      return;
+    }
     const note = document.getElementById('alur-note')?.value;
     if (note && note.trim()) {
       t.proofNote = note.trim();
       t.hasProof = true;
-      t.lastUpdated = "Baru saja";
-      if (!t.history) t.history = [];
+      t.lastUpdated = "Baru saja (" + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB)";
+      if (!Array.isArray(t.history)) t.history = [];
       t.history.push({
         time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
         actor: currentUser.nama,
         note: note.trim(),
-        stage: t.stage
+        stage: Number(t.stage) || 1
       });
       syncSingleTaskToCloud(t);
       renderAlurView(t.id);
@@ -1183,7 +989,8 @@
     }
   }
 
-  function compressImageToDataURL(file, maxWidth = 800, quality = 0.65) {
+  // Kompresi otomatis agar selalu di bawah 42.000 karakter (aman untuk batas sel Google Sheets 50.000 karakter)
+  function compressImageToDataURL(file, maxWidth = 540, quality = 0.6) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = function(e) {
@@ -1200,7 +1007,21 @@
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', quality));
+
+          let q = quality;
+          let dataUrl = canvas.toDataURL('image/jpeg', q);
+          while (dataUrl.length > 42000 && q > 0.2) {
+            q -= 0.1;
+            dataUrl = canvas.toDataURL('image/jpeg', q);
+          }
+          if (dataUrl.length > 42000) {
+            const smallCanvas = document.createElement('canvas');
+            smallCanvas.width = Math.round(width * 0.65);
+            smallCanvas.height = Math.round(height * 0.65);
+            smallCanvas.getContext('2d').drawImage(img, 0, 0, smallCanvas.width, smallCanvas.height);
+            dataUrl = smallCanvas.toDataURL('image/jpeg', 0.45);
+          }
+          resolve(dataUrl);
         };
         img.onerror = reject;
         img.src = e.target.result;
@@ -1211,31 +1032,54 @@
   }
 
   async function handleFotoUpload(event) {
-    const file = event.target.files[0];
+    const fileInput = event.target;
+    const file = fileInput.files && fileInput.files[0];
     if (!file) return;
-    const t = TASKS.find(x => x.id === activeTaskId);
-    if (!t) return;
 
-    showToast("Mengompresi & menyimpan foto bukti ke Drive...");
+    const selVal = document.getElementById('alur-task-select')?.value;
+    const targetId = Number(selVal || activeTaskId);
+    const t = TASKS.find(x => Number(x.id) === targetId);
+    if (!t) {
+      showToast("Pilih tugas terlebih dahulu sebelum unggah foto.");
+      fileInput.value = '';
+      return;
+    }
+
+    showToast("Mengompresi & mengunggah foto bukti...");
     try {
       const compressedDataUrl = await compressImageToDataURL(file);
       t.proofImg = compressedDataUrl;
       t.hasProof = true;
-      t.lastUpdated = "Baru saja";
-      if (!t.proofNote) t.proofNote = `Lampiran foto (${file.name}) oleh ${currentUser.nama}`;
-      if (!t.history) t.history = [];
+      t.lastUpdated = "Baru saja (" + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB)";
+
+      const noteVal = document.getElementById('alur-note')?.value;
+      if (noteVal && noteVal.trim()) {
+        t.proofNote = noteVal.trim();
+      } else if (!t.proofNote) {
+        t.proofNote = `Lampiran foto (${file.name}) oleh ${currentUser.nama}`;
+      }
+
+      if (!Array.isArray(t.history)) t.history = [];
       t.history.push({
         time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
         actor: currentUser.nama,
         note: `Mengunggah foto bukti lapangan: ${file.name}`,
-        stage: t.stage
+        stage: Number(t.stage) || 1
       });
-      await syncSingleTaskToCloud(t);
+
+      // Tampilkan langsung di layar sebelum sinkronisasi cloud selesai
+      saveTasksToLocal();
       renderAlurView(t.id);
+      renderUserTaskList();
       renderMonitoringView();
-      showToast(`Foto "${file.name}" tersimpan di Google Drive!`);
+
+      await syncSingleTaskToCloud(t);
+      showToast(`Foto "${file.name}" berhasil disimpan!`);
     } catch (err) {
-      showToast("Gagal memproses gambar. Coba file lain.");
+      console.error("Error upload foto:", err);
+      showToast("Gagal memproses gambar. Silakan pilih file foto JPG/PNG.");
+    } finally {
+      fileInput.value = '';
     }
   }
 
@@ -1288,8 +1132,9 @@
     let total = TASKS.length;
     let jalan = 0, bukti = 0, sah = 0;
     TASKS.forEach(t => {
-      if (t.stage <= 2) jalan++;
-      else if (t.stage <= 4) bukti++;
+      const st = Number(t.stage) || 1;
+      if (st <= 2) jalan++;
+      else if (st <= 4) bukti++;
       else sah++;
     });
 
@@ -1300,14 +1145,14 @@
 
     let filtered = [...TASKS];
     if (monFilterAparatur !== 'semua') {
-      filtered = filtered.filter(t => t.assignee.toLowerCase().includes(monFilterAparatur.toLowerCase()));
+      filtered = filtered.filter(t => (t.assignee || '').toLowerCase().includes(monFilterAparatur.toLowerCase()));
     }
     if (monFilterStage === '20-40') {
-      filtered = filtered.filter(t => t.stage === 1 || t.stage === 2);
+      filtered = filtered.filter(t => Number(t.stage) === 1 || Number(t.stage) === 2);
     } else if (monFilterStage === '60-80') {
-      filtered = filtered.filter(t => t.stage === 3 || t.stage === 4);
+      filtered = filtered.filter(t => Number(t.stage) === 3 || Number(t.stage) === 4);
     } else if (monFilterStage === '100') {
-      filtered = filtered.filter(t => t.stage === 5);
+      filtered = filtered.filter(t => Number(t.stage) === 5);
     }
     if (monFilterCat !== 'semua') {
       filtered = filtered.filter(t => t.category === monFilterCat);
@@ -1327,13 +1172,14 @@
     const isSekdesAdmin = currentUser && currentUser.id === 2;
 
     container.innerHTML = filtered.map(t => {
-      const percent = t.stage * 20;
+      const stageNum = Number(t.stage) || 1;
+      const percent = stageNum * 20;
       let badgeColor = "bg-blue-100 text-blue-800";
       let barColor = "bg-blue-600";
-      if (t.stage >= 3 && t.stage <= 4) {
+      if (stageNum >= 3 && stageNum <= 4) {
         badgeColor = "bg-amber-100 text-amber-800";
         barColor = "bg-amber-500";
-      } else if (t.stage === 5) {
+      } else if (stageNum === 5) {
         badgeColor = "bg-emerald-100 text-emerald-800";
         barColor = "bg-emerald-600";
       }
@@ -1344,7 +1190,7 @@
             <div class="flex items-center space-x-1.5">
               <span class="text-[8px] font-bold bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded">${t.code}</span>
               <span class="text-[8px] font-bold ${badgeColor} px-2 py-0.5 rounded-full">
-                Tahap ${t.stage}/5 (${t.progress})
+                Tahap ${stageNum}/5 (${t.progress})
               </span>
             </div>
             <span class="text-[8px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${t.lastUpdated || 'Hari ini'}</span>
@@ -1356,7 +1202,7 @@
             </h4>
             <div class="mt-0.5 flex items-center justify-between text-[10px]">
               <span class="text-slate-600">Pelaksana: <strong class="text-gov-800 font-bold">${t.assignee}</strong></span>
-              <span class="text-[9px] text-slate-400">Oleh: ${t.creator.split('(')[0]}</span>
+              <span class="text-[9px] text-slate-400">Oleh: ${(t.creator || '').split('(')[0]}</span>
             </div>
           </div>
 
@@ -1364,7 +1210,7 @@
             <div class="flex items-center justify-between text-[9px]">
               <span class="text-slate-600 font-semibold flex items-center truncate max-w-[210px]">
                 <i class="fa-solid fa-diagram-project text-gov-700 mr-1 text-[8px]"></i>
-                Alur: <strong class="ml-1 text-slate-800 truncate">${SOP_STEPS[t.stage - 1].title}</strong>
+                Alur: <strong class="ml-1 text-slate-800 truncate">${SOP_STEPS[stageNum - 1].title}</strong>
               </span>
               <span class="font-bold text-gov-800 shrink-0">${percent}%</span>
             </div>
@@ -1404,23 +1250,26 @@
   let inspectedTaskId = null;
 
   function bukaUnitDetailModal(taskId) {
-    inspectedTaskId = parseInt(taskId, 10);
-    const t = TASKS.find(x => x.id === inspectedTaskId);
+    inspectedTaskId = Number(taskId);
+    const t = TASKS.find(x => Number(x.id) === inspectedTaskId);
     if (!t) return;
 
+    const stageNum = Number(t.stage) || 1;
     document.getElementById('unit-detail-title').innerText = `${t.code} - ${t.priority}`;
     const body = document.getElementById('unit-detail-body');
     const footer = document.getElementById('unit-detail-footer');
-    const percent = t.stage * 20;
+    const percent = stageNum * 20;
 
-    const isOwner = t.assignee.toLowerCase().includes(currentUser.nama.toLowerCase());
+    const assigneeLower = (t.assignee || '').toLowerCase();
+    const userLower = currentUser.nama.toLowerCase();
+    const isOwner = assigneeLower.includes(userLower) || userLower.includes(assigneeLower);
     const isLeader = currentUser.isLeader;
     const isSekdesAdmin = currentUser && currentUser.id === 2;
 
     body.innerHTML = `
       <div class="bg-gov-50 border border-gov-200 rounded-xl p-2.5 space-y-1">
         <div class="flex items-center justify-between">
-          <span class="text-[8px] bg-gov-700 text-white font-bold px-1.5 py-0.2 rounded">${t.category.toUpperCase()}</span>
+          <span class="text-[8px] bg-gov-700 text-white font-bold px-1.5 py-0.2 rounded">${(t.category || 'tugas').toUpperCase()}</span>
           <span class="text-[9px] font-bold text-gov-800">Tenggat: ${t.deadline}</span>
         </div>
         <h4 class="font-bold text-xs text-slate-900">${t.title}</h4>
@@ -1435,11 +1284,11 @@
         <div class="flex items-center justify-between">
           <span class="font-extrabold text-[11px] text-slate-800">Progres Alur Kinerja:</span>
           <span class="text-[10px] font-extrabold text-gov-800 bg-emerald-100 px-2 py-0.5 rounded-full">
-            Tahap ${t.stage}/5 (${t.progress})
+            Tahap ${stageNum}/5 (${t.progress})
           </span>
         </div>
         <p class="text-[10px] font-semibold text-slate-700">
-          <i class="fa-solid fa-circle-notch text-gov-700 mr-1"></i>${SOP_STEPS[t.stage - 1].title}
+          <i class="fa-solid fa-circle-notch text-gov-700 mr-1"></i>${SOP_STEPS[stageNum - 1].title}
         </p>
         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
           <div class="bg-gov-700 h-2 rounded-full transition-all duration-300" style="width: ${percent}%"></div>
@@ -1458,9 +1307,9 @@
             </p>
             ${t.proofImg ? `
               <div class="relative rounded-lg overflow-hidden border border-slate-200">
-                <img src="${t.proofImg}" class="w-full h-28 object-cover" alt="Bukti"/>
+                <img src="${t.proofImg}" class="w-full h-36 object-cover" alt="Bukti"/>
                 <div class="absolute bottom-1 left-1 bg-black/60 text-white text-[8px] px-1 py-0.2 rounded font-mono">
-                  <i class="fa-solid fa-location-dot text-emerald-400 mr-1"></i>${t.location}
+                  <i class="fa-solid fa-location-dot text-emerald-400 mr-1"></i>${t.location || 'Desa Sumengko'}
                 </div>
               </div>
             ` : ''}
@@ -1515,11 +1364,11 @@
         </button>
       ` : ''}
       <button onclick="tutupUnitDetailModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-1.5 rounded-xl text-xs">Tutup</button>
-      ${isLeader && t.stage < 5 ? `
+      ${isLeader && stageNum < 5 ? `
         <button onclick="parafPengesahanPimpinan(${t.id})" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 rounded-xl text-xs shadow flex items-center justify-center space-x-1">
           <i class="fa-solid fa-signature text-[10px]"></i><span>Sahkan / Validasi 100%</span>
         </button>
-      ` : (isOwner && t.stage < 5 ? `
+      ` : (isOwner && stageNum < 5 ? `
         <button onclick="tutupUnitDetailModal(); pindahKeAlur(${t.id});" class="flex-1 bg-gov-700 hover:bg-gov-800 text-white font-bold py-1.5 rounded-xl text-xs shadow flex items-center justify-center space-x-1">
           <i class="fa-solid fa-forward-step text-[10px]"></i><span>Update Alur Sekarang</span>
         </button>
@@ -1534,12 +1383,12 @@
   }
 
   function parafPengesahanPimpinan(taskId) {
-    const t = TASKS.find(x => x.id === taskId);
+    const t = TASKS.find(x => Number(x.id) === Number(taskId));
     if (!t) return;
     t.stage = 5;
     t.progress = "100%";
     t.lastUpdated = "Hari ini (" + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB)";
-    if (!t.history) t.history = [];
+    if (!Array.isArray(t.history)) t.history = [];
     t.history.push({
       time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
       actor: currentUser.nama + ` (${currentUser.jabatan})`,
@@ -1556,7 +1405,7 @@
   }
 
   function kirimFeedbackDisposisi(taskId) {
-    const t = TASKS.find(x => x.id === taskId);
+    const t = TASKS.find(x => Number(x.id) === Number(taskId));
     const input = document.getElementById('input-modal-fb');
     if (!t || !input || !input.value.trim()) {
       showToast("Tuliskan catatan disposisi terlebih dahulu.");
@@ -1565,12 +1414,12 @@
     const fb = input.value.trim();
     t.leaderFeedback = fb;
     t.lastUpdated = "Baru saja";
-    if (!t.history) t.history = [];
+    if (!Array.isArray(t.history)) t.history = [];
     t.history.push({
       time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
       actor: currentUser.nama + ` (${currentUser.jabatan})`,
       note: `Catatan Atasan: "${fb}"`,
-      stage: t.stage
+      stage: Number(t.stage) || 1
     });
     syncSingleTaskToCloud(t);
     renderMonitoringView();
@@ -1586,7 +1435,7 @@
     localStorage.setItem(LS_USER_KEY, String(currentUser.id));
 
     const userTasks = getUserTasks();
-    activeTaskId = userTasks.length > 0 ? userTasks[0].id : null;
+    activeTaskId = userTasks.length > 0 ? Number(userTasks[0].id) : null;
 
     updateHeaderUI();
     renderAparaturModal();
@@ -1752,11 +1601,16 @@
     };
 
     TASKS.unshift(newTask);
+    if (assignee.toLowerCase().includes(currentUser.nama.toLowerCase())) {
+      activeTaskId = newId;
+    }
+
     document.getElementById('input-task-title').value = '';
     document.getElementById('input-task-desc').value = '';
     syncSingleTaskToCloud(newTask);
     tutupModalBuatTugas();
     renderUserTaskList();
+    renderAlurView(activeTaskId);
     renderMonitoringView();
     showToast(`Tugas baru berhasil disimpan & dikirim ke: ${assignee}!`);
   }
@@ -1915,9 +1769,9 @@
   let pendingDeleteTaskId = null; 
   
   function bukaModalHapus(taskId) { 
-    const t = TASKS.find(x => x.id === parseInt(taskId, 10)); 
+    const t = TASKS.find(x => Number(x.id) === Number(taskId)); 
     if (!t) return; 
-    pendingDeleteTaskId = t.id; 
+    pendingDeleteTaskId = Number(t.id); 
     document.getElementById('del-task-code').innerText = t.code; 
     document.getElementById('del-task-title').innerText = t.title; 
     document.getElementById('modal-konfirmasi-hapus').classList.remove('hidden'); 
@@ -1935,27 +1789,27 @@
   } 
   
   function deleteTask(taskId) { 
-    const idNum = parseInt(taskId, 10); 
-    const targetIdx = TASKS.findIndex(x => x.id === idNum); 
+    const idNum = Number(taskId); 
+    const targetIdx = TASKS.findIndex(x => Number(x.id) === idNum); 
     if (targetIdx === -1) return; 
     
     TASKS.splice(targetIdx, 1); 
     deleteSingleTaskFromCloud(idNum);
     
-    if (typeof inspectedTaskId !== 'undefined' && inspectedTaskId === idNum) { 
+    if (typeof inspectedTaskId !== 'undefined' && Number(inspectedTaskId) === idNum) { 
       tutupUnitDetailModal(); 
     } 
     
     const remainingUserTasks = getUserTasks(); 
-    if (activeTaskId === idNum) { 
-      activeTaskId = remainingUserTasks.length > 0 ? remainingUserTasks[0].id : null; 
+    if (Number(activeTaskId) === idNum) { 
+      activeTaskId = remainingUserTasks.length > 0 ? Number(remainingUserTasks[0].id) : null; 
     } 
     
     renderUserTaskList(); 
     renderAlurView(activeTaskId); 
     renderMonitoringView(); 
     if (typeof renderLeaderboard === 'function') renderLeaderboard(); 
-    showToast('Tugas berhasil dihapus permanen oleh Admin Sekdes.'); 
+    showToast('Tugas berhasil dihapus permanen.'); 
   } 
 
   // ==============================================================
