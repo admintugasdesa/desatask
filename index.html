@@ -1137,6 +1137,38 @@
     });
   }
 
+  // ==============================================================
+  // ATURAN PERSETUJUAN TAHAP 5 (100%)
+  // ==============================================================
+  function butuhPersetujuanAtasan(t) {
+    // Hanya tugas 'mandiri' yang bisa 100% tanpa persetujuan orang lain
+    return (t.category || '') !== 'mandiri';
+  }
+
+  function bolehSahkanTugas(t) {
+    if (!currentUser || !t) return false;
+    if (!butuhPersetujuanAtasan(t)) return true; // Tugas mandiri boleh diselesaikan sendiri
+    if (!currentUser.isLeader) return false;
+
+    // Kepala Desa (id: 1) adalah pimpinan tertinggi desa
+    if (currentUser.id === 1) return true;
+
+    // Cek hierarki: atasan hanya boleh mengesahkan tugas bawahan (bukan tugas miliknya sendiri)
+    const assigneeLower = (t.assignee || '').toLowerCase();
+    const targetAparatur = APARATUR.find(a => {
+      const n = a.nama.toLowerCase();
+      return assigneeLower.includes(n) || n.includes(assigneeLower);
+    });
+
+    if (targetAparatur) {
+      return currentUser.id < targetAparatur.id;
+    }
+
+    const userLower = currentUser.nama.toLowerCase();
+    const isOwner = assigneeLower.includes(userLower) || userLower.includes(assigneeLower);
+    return !isOwner;
+  }
+
   // Render Tab 1: Tugas Saya
   function renderUserTaskList() {
     if (!currentUser) return;
@@ -1174,19 +1206,20 @@
       const colorBar = isUrgent ? 'bg-red-500' : 'bg-gov-700';
       const isSekdes = t.creator && t.creator.includes('Herman');
       const percent = stageNum * 20;
+      const waitingApproval = stageNum === 4 && butuhPersetujuanAtasan(t);
 
       return `
         <div class="user-task-card bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs relative overflow-hidden transition hover:border-gov-600" data-cat="${t.category}">
           <div class="absolute top-0 left-0 w-1 h-full ${colorBar}"></div>
           <div class="pl-2">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between gap-1">
               <div class="flex items-center space-x-1 flex-wrap">
                 <span class="text-[8px] ${isUrgent ? 'bg-red-100 text-red-700 font-bold' : 'bg-slate-100 text-slate-700'} px-1.5 py-0.2 rounded">${t.priority}</span>
                 <span class="text-[8px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">${t.code}</span>
                 ${isSekdes ? '<span class="text-[8px] bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.2 rounded"><i class="fa-solid fa-paper-plane mr-1 text-[7px]"></i>Dari Sekdes Herman</span>' : ''}
               </div>
-              <span class="text-[8px] font-extrabold ${stageNum === 5 ? 'bg-emerald-100 text-emerald-800' : 'bg-gov-50 text-gov-700 border border-gov-200'} px-2 py-0.5 rounded-full">
-                Tahap ${stageNum}/5 (${t.progress})
+              <span class="text-[8px] font-extrabold shrink-0 ${stageNum === 5 ? 'bg-emerald-100 text-emerald-800' : (waitingApproval ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-gov-50 text-gov-700 border border-gov-200')} px-2 py-0.5 rounded-full">
+                ${waitingApproval ? '80% • Menunggu ACC' : `Tahap ${stageNum}/5 (${t.progress})`}
               </span>
             </div>
 
@@ -1199,7 +1232,7 @@
             </div>
 
             <div class="w-full bg-slate-100 h-1.5 rounded-full mt-1.5 overflow-hidden">
-              <div class="bg-gov-700 h-1.5 rounded-full transition-all duration-300" style="width: ${percent}%"></div>
+              <div class="${waitingApproval ? 'bg-amber-500' : 'bg-gov-700'} h-1.5 rounded-full transition-all duration-300" style="width: ${percent}%"></div>
             </div>
 
             <div class="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-xs">
@@ -1290,6 +1323,8 @@
 
     const t = TASKS.find(x => Number(x.id) === activeTaskId) || tasks[0];
     const stageNum = Number(t.stage) || 1;
+    const needApproval = butuhPersetujuanAtasan(t);
+    const canApprove = bolehSahkanTugas(t);
 
     document.getElementById('alur-badge-code').innerText = t.code;
     document.getElementById('alur-creator').innerText = t.creator;
@@ -1300,6 +1335,7 @@
     stepperBox.innerHTML = SOP_STEPS.map(s => {
       const isDone = s.step < stageNum;
       const isCurrent = s.step === stageNum;
+      const isLockedStep5 = s.step === 5 && needApproval && !canApprove && stageNum < 5;
 
       let circleClass = "bg-slate-200 border-slate-300 text-slate-600";
       let cardBg = "bg-slate-50 border-slate-200";
@@ -1316,19 +1352,27 @@
         cardBg = "bg-emerald-50 border-emerald-400";
         icon = `<span class="text-[10px] font-extrabold text-white">${s.step}</span>`;
         badge = `<span class="text-[8px] bg-gov-700 text-white font-bold px-1.5 py-0.2 rounded-full">Aktif (${s.percent})</span>`;
+      } else if (isLockedStep5) {
+        circleClass = "bg-amber-100 border-amber-300 text-amber-700";
+        cardBg = "bg-amber-50/40 border-amber-200/80";
+        icon = `<i class="fa-solid fa-lock text-[8px]"></i>`;
+        badge = `<span class="text-[8px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded">Wajib ACC Atasan</span>`;
       }
 
+      const stepTitle = (s.step === 5 && !needApproval) ? "Selesai Mandiri (100%)" : s.title;
+      const stepDesc = (s.step === 5 && !needApproval) ? "Tugas inisiatif mandiri diselesaikan penuh oleh pelaksana." : s.desc;
+
       return `
-        <div class="relative flex items-start space-x-2 cursor-pointer" onclick="lompatKeTahap(${s.step})" title="Klik untuk beralih ke tahap ini">
+        <div class="relative flex items-start space-x-2 ${isLockedStep5 ? 'cursor-not-allowed' : 'cursor-pointer'}" onclick="lompatKeTahap(${s.step})" title="${isLockedStep5 ? 'Tahap 5 hanya bisa disetujui oleh Atasan' : 'Klik untuk beralih ke tahap ini'}">
           <span class="absolute -left-5 top-1 w-4 h-4 rounded-full ${circleClass} flex items-center justify-center transition">
             ${icon}
           </span>
-          <div class="flex-1 ${cardBg} border p-2 rounded-xl transition hover:border-gov-600">
+          <div class="flex-1 ${cardBg} border p-2 rounded-xl transition ${isLockedStep5 ? '' : 'hover:border-gov-600'}">
             <div class="flex items-center justify-between">
-              <h5 class="font-extrabold text-[11px] ${isCurrent ? 'text-gov-900' : 'text-slate-800'}">${s.step}. ${s.title}</h5>
+              <h5 class="font-extrabold text-[11px] ${isCurrent ? 'text-gov-900' : 'text-slate-800'}">${s.step}. ${stepTitle}</h5>
               ${badge}
             </div>
-            <p class="text-[9px] ${isCurrent ? 'text-gov-800 font-medium' : 'text-slate-500'} mt-0.5">${isCurrent ? t.desc : s.desc}</p>
+            <p class="text-[9px] ${isCurrent ? 'text-gov-800 font-medium' : 'text-slate-500'} mt-0.5">${isCurrent ? t.desc : stepDesc}</p>
           </div>
         </div>
       `;
@@ -1349,12 +1393,35 @@
 
     const btnNaik = document.getElementById('btn-naik-tahap');
     const labelNaik = document.getElementById('btn-naik-label');
-    if (stageNum < 5) {
+    const btnIcon = btnNaik.querySelector('i');
+
+    if (stageNum < 4) {
       const nextNum = stageNum + 1;
+      if (btnIcon) btnIcon.className = "fa-solid fa-arrow-up-right-dots";
       labelNaik.innerText = `Tingkatkan ke Tahap ${nextNum}: ${SOP_STEPS[nextNum - 1].title}`;
       btnNaik.className = "w-full bg-gov-700 hover:bg-gov-800 text-white font-extrabold py-3 rounded-xl shadow flex items-center justify-center space-x-2 transition text-xs";
+    } else if (stageNum === 4) {
+      if (!needApproval) {
+        // Tugas Inisiatif Mandiri -> Langsung bisa 100%
+        if (btnIcon) btnIcon.className = "fa-solid fa-circle-check";
+        labelNaik.innerText = "Selesaikan Tugas Mandiri (100%)";
+        btnNaik.className = "w-full bg-gov-700 hover:bg-gov-800 text-white font-extrabold py-3 rounded-xl shadow flex items-center justify-center space-x-2 transition text-xs";
+      } else if (canApprove) {
+        // Atasan tertinggi (Kades) mengerjakan tugas sendiri
+        if (btnIcon) btnIcon.className = "fa-solid fa-signature";
+        labelNaik.innerText = "Sahkan & Selesaikan Tugas (100%)";
+        btnNaik.className = "w-full bg-gov-700 hover:bg-gov-800 text-white font-extrabold py-3 rounded-xl shadow flex items-center justify-center space-x-2 transition text-xs";
+      } else {
+        // Tugas Instruksi Atasan / Notulen Rapat -> Tertahan di 80% sampai disetujui atasan
+        if (btnIcon) btnIcon.className = "fa-solid fa-hourglass-half";
+        labelNaik.innerText = "Menunggu Persetujuan Atasan (Maks. 80%)";
+        btnNaik.className = "w-full bg-amber-100 border border-amber-300 text-amber-900 font-extrabold py-3 rounded-xl flex items-center justify-center space-x-2 transition text-xs cursor-not-allowed";
+      }
     } else {
-      labelNaik.innerText = "Tugas Selesai Penuh (100% Pengesahan Pimpinan)";
+      if (btnIcon) btnIcon.className = "fa-solid fa-circle-check";
+      labelNaik.innerText = needApproval
+        ? "Tugas Selesai Penuh (100% Disetujui Atasan)"
+        : "Tugas Inisiatif Mandiri Selesai (100%)";
       btnNaik.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl shadow flex items-center justify-center space-x-2 transition text-xs";
     }
   }
@@ -1369,6 +1436,13 @@
     }
 
     const currentStage = Number(t.stage) || 1;
+
+    // Blokir kenaikan dari Tahap 4 (80%) ke Tahap 5 (100%) jika wajib persetujuan atasan
+    if (currentStage === 4 && butuhPersetujuanAtasan(t) && !bolehSahkanTugas(t)) {
+      showToast("Progres sudah maksimal (80%). Menunggu persetujuan atasan untuk mencapai 100%.");
+      return;
+    }
+
     if (currentStage < 5) {
       t.stage = currentStage + 1;
       t.progress = (t.stage * 20) + '%';
@@ -1379,7 +1453,13 @@
       t.lastUpdated = "Baru saja (" + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB)";
 
       const noteVal = document.getElementById('alur-note')?.value;
-      const note = (noteVal && noteVal.trim()) ? noteVal.trim() : `Progres ditingkatkan ke Tahap ${t.stage}: ${SOP_STEPS[t.stage - 1].title}`;
+      const defaultNote = (t.stage === 5 && !butuhPersetujuanAtasan(t))
+        ? "Tugas inisiatif mandiri diselesaikan penuh (100%)."
+        : (t.stage === 4 && butuhPersetujuanAtasan(t))
+          ? "Laporan & bukti selesai diunggah (80%). Menunggu pengesahan atasan."
+          : `Progres ditingkatkan ke Tahap ${t.stage}: ${SOP_STEPS[t.stage - 1].title}`;
+
+      const note = (noteVal && noteVal.trim()) ? noteVal.trim() : defaultNote;
       t.proofNote = note;
 
       if (!Array.isArray(t.history)) t.history = [];
@@ -1392,7 +1472,12 @@
 
       syncSingleTaskToCloud(t);
       refreshAllViews();
-      showToast(`Sukses! Tahap ${t.stage} (${t.progress}) tersimpan permanen!`);
+
+      if (t.stage === 4 && butuhPersetujuanAtasan(t) && !bolehSahkanTugas(t)) {
+        showToast("Tahap 4 (80%) tersimpan! Menunggu persetujuan atasan untuk 100%.");
+      } else {
+        showToast(`Sukses! Tahap ${t.stage} (${t.progress}) tersimpan permanen!`);
+      }
     } else {
       showToast("Tugas sudah selesai 100% dan terverifikasi penuh.");
     }
@@ -1404,7 +1489,22 @@
     const t = TASKS.find(x => Number(x.id) === targetId);
     if (!t) return;
 
-    t.stage = Number(stepNum);
+    const targetStep = Number(stepNum);
+    const currentStage = Number(t.stage) || 1;
+
+    // Blokir lompat langsung ke Tahap 5 jika wajib persetujuan atasan
+    if (targetStep === 5 && butuhPersetujuanAtasan(t) && !bolehSahkanTugas(t)) {
+      showToast("Tahap 5 (100%) hanya bisa disetujui oleh atasan!");
+      return;
+    }
+
+    // Cegah perubahan tahap jika tugas sudah disahkan 100% oleh atasan
+    if (currentStage === 5 && butuhPersetujuanAtasan(t) && !bolehSahkanTugas(t)) {
+      showToast("Tugas ini sudah disahkan 100% oleh atasan.");
+      return;
+    }
+
+    t.stage = targetStep;
     t.progress = (t.stage * 20) + '%';
     t.hasProof = true;
     if (t.stage === 5 && !t.completedAt) {
