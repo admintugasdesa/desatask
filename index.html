@@ -584,7 +584,7 @@
   </div>
 
   <!-- ==================== MODAL 4: DETAIL UNIT TUGAS ==================== -->
-  <div id="modal-unit-detail" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 flex items-end sm:items-center justify-center p-3">
+  <div id="modal-unit-detail" onclick="if(event.target === this) tutupUnitDetailModal()" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 flex items-end sm:items-center justify-center p-3">
     <div class="bg-slate-50 w-full max-w-md rounded-2xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
       <div class="p-3 bg-gov-700 text-white flex items-center justify-between">
         <h3 id="unit-detail-title" class="font-extrabold text-xs">Detail Unit Tugas</h3>
@@ -2011,7 +2011,13 @@
 
     document.getElementById('modal-unit-detail').classList.remove('hidden');
   }
-
+    
+  function tutupUnitDetailModal() {
+    inspectedTaskId = null;
+    const modal = document.getElementById('modal-unit-detail');
+    if (modal) modal.classList.add('hidden');
+  }
+    
   function parafPengesahanPimpinan(taskId) {
     const t = TASKS.find(x => Number(x.id) === Number(taskId));
     if (!t) return;
