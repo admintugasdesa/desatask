@@ -1,4 +1,4 @@
-const CACHE_NAME = 'desatask-pwa-v2.9.1';
+const CACHE_NAME = 'desatask-pwa-v3.0.0';
 
 const CORE_ASSETS = [
   './',
@@ -33,11 +33,17 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// 3. Fetch: Network-First untuk HTML, Cache-First + Runtime Cache untuk CDN & Aset
+// 3. Fetch: Lewati lalu lintas Google Apps Script, gunakan Network-First untuk HTML
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  const requestUrl = new URL(event.request.url);
+  // Jangan pernah cache API Google Apps Script / Google Drive
+  if (
+    event.request.url.includes('script.google.com') ||
+    event.request.url.includes('script.googleusercontent.com')
+  ) {
+    return;
+  }
 
   // Strategi untuk halaman utama (selalu utamakan versi terbaru dari GitHub)
   if (event.request.mode === 'navigate') {
@@ -53,7 +59,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Strategi untuk ikon, CSS, Font, dan CDN (Tailwind, FontAwesome, Google Fonts)
+  // Strategi untuk ikon, CSS, Font, dan CDN
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -73,12 +79,7 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         })
-        .catch(() => {
-          // Abaikan jika gagal mengambil gambar eksternal saat offline
-	if (event.request.url.includes('script.google.com') || event.request.url.includes('script.googleusercontent.com')) {
-    return;
-  }
-        });
+        .catch(() => {});
     })
   );
 });

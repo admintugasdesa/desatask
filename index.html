@@ -11,116 +11,465 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="DesaTask">
   <link rel="apple-touch-icon" href="./icons/icon-180.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+          colors: {
+            gov: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              600: '#059669',
+              700: '#0f5132',
+              800: '#0a3622',
+              900: '#052e16'
+            }
+          }
+        }
+      }
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased select-none pb-20">
+
+  <!-- TOAST NOTIFIKASI -->
+  <div id="toast-notif" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none -translate-y-4 max-w-[92vw]">
+    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toast-msg" class="truncate">Notifikasi</span>
+  </div>
+
+  <!-- HEADER UTAMA -->
+  <header class="bg-gradient-to-br from-gov-800 via-gov-700 to-emerald-800 text-white sticky top-0 z-30 shadow-md">
+    <div class="max-w-md mx-auto px-3.5 pt-3 pb-2.5 space-y-2.5">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center shadow-inner">
+            <i class="fa-solid fa-landmark text-emerald-300 text-sm"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-1.5">
+              <h1 class="font-extrabold text-sm tracking-tight leading-none">DesaTask</h1>
+              <span class="text-[8px] bg-emerald-400/20 text-emerald-200 border border-emerald-300/30 px-1.5 py-0.2 rounded-full font-bold">SUMENGKO</span>
+            </div>
+            <p class="text-[9px] text-emerald-100/80 mt-0.5">Kec. Kwadungan, Kab. Ngawi</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-1.5">
+          <button type="button" onclick="showToast('Aplikasi siap diinstal ke layar utama HP')" title="Instal Aplikasi" class="bg-white/15 hover:bg-white/25 border border-white/20 text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center space-x-1 transition">
+            <i class="fa-solid fa-download text-[9px] text-emerald-300"></i>
+            <span>Instal</span>
+          </button>
+          <button type="button" onclick="kunciAkunSekarang()" title="Kunci Sesi" class="bg-white/15 hover:bg-white/25 border border-white/20 text-white w-7 h-7 rounded-lg flex items-center justify-center transition">
+            <i class="fa-solid fa-lock text-[10px] text-amber-300"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- KARTU PROFIL APARATUR AKTIF -->
+      <div onclick="bukaModalGantiAkun()" class="bg-white/10 hover:bg-white/15 border border-white/20 rounded-xl p-2 flex items-center justify-between cursor-pointer transition">
+        <div class="flex items-center space-x-2.5 min-w-0">
+          <div id="hdr-avatar" class="w-9 h-9 rounded-full bg-emerald-400 text-gov-900 font-extrabold text-sm flex items-center justify-center shrink-0 shadow">N</div>
+          <div class="min-w-0">
+            <div class="flex items-center space-x-1.5">
+              <span id="hdr-role-badge" class="text-[8px] bg-amber-400 text-slate-900 font-extrabold px-1.5 py-0.2 rounded">Kaur Keu</span>
+              <span id="hdr-jabatan" class="text-[10px] text-emerald-100 font-semibold truncate">Kaur Keuangan</span>
+            </div>
+            <p id="hdr-nama" class="font-extrabold text-xs text-white truncate mt-0.5">Naning Lestari</p>
+          </div>
+        </div>
+        <div class="bg-white/15 px-2 py-1 rounded-lg text-[9px] font-bold flex items-center space-x-1 shrink-0">
+          <span>Ganti</span>
+          <i class="fa-solid fa-repeat text-[8px]"></i>
+        </div>
+      </div>
+
+      <!-- AKSES CEPAT ROLE -->
+      <div class="grid grid-cols-4 gap-1">
+        <button id="btn-role-kades" onclick="pilihAparaturDenganPin(1)" class="px-1 py-1 rounded-lg text-[9px] border transition truncate text-center">Kades</button>
+        <button id="btn-role-sekdes" onclick="pilihAparaturDenganPin(2)" class="px-1 py-1 rounded-lg text-[9px] border transition truncate text-center">Sekdes</button>
+        <button id="btn-role-naning" onclick="pilihAparaturDenganPin(3)" class="px-1 py-1 rounded-lg text-[9px] border transition truncate text-center">Kaur Keu</button>
+        <button id="btn-role-kasun" onclick="pilihAparaturDenganPin(9)" class="px-1 py-1 rounded-lg text-[9px] border transition truncate text-center">Kadus A</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- KONTEN UTAMA -->
+  <main class="max-w-md mx-auto px-3.5 pt-3 space-y-3">
+
+    <!-- ==================== TAB 1: TUGAS SAYA ==================== -->
+    <section id="view-tugas" class="space-y-3">
+      <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs">
+        <div class="flex items-center justify-between mb-2">
+          <div>
+            <p class="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">Ringkasan Kinerja</p>
+            <h2 id="txt-owner-name" class="font-extrabold text-xs text-slate-800">Naning Lestari</h2>
+          </div>
+          <button onclick="bukaModalBuatTugas()" class="bg-gov-700 hover:bg-gov-800 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-xs flex items-center space-x-1 transition">
+            <i class="fa-solid fa-plus text-[9px]"></i>
+            <span>Tugas Baru</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-1.5 text-center">
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-1.5">
+            <p id="cnt-pending" class="font-extrabold text-sm text-amber-700">0</p>
+            <p class="text-[9px] text-amber-800 font-semibold">Disposisi Baru</p>
+          </div>
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-1.5">
+            <p id="cnt-process" class="font-extrabold text-sm text-blue-700">0</p>
+            <p class="text-[9px] text-blue-800 font-semibold">Berjalan</p>
+          </div>
+          <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-1.5">
+            <p id="cnt-done" class="font-extrabold text-sm text-emerald-700">0</p>
+            <p class="text-[9px] text-emerald-800 font-semibold">Tuntas 100%</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILTER KATEGORI TUGAS -->
+      <div class="flex items-center space-x-1.5 overflow-x-auto pb-0.5 text-[10px] font-bold">
+        <button onclick="filterTugasUser('semua', this)" class="bg-gov-700 text-white px-2.5 py-0.5 rounded-full filter-tab active">Semua</button>
+        <button onclick="filterTugasUser('kades', this)" class="bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full filter-tab">Instruksi Pimpinan</button>
+        <button onclick="filterTugasUser('mandiri', this)" class="bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full filter-tab">Mandiri</button>
+        <button onclick="filterTugasUser('notulen', this)" class="bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full filter-tab">Notulen Musdes</button>
+      </div>
+
+      <!-- DAFTAR KARTU TUGAS -->
+      <div id="user-task-list" class="space-y-2"></div>
+    </section>
+
+    <!-- ==================== TAB 2: UPDATE ALUR ==================== -->
+    <section id="view-alur" class="hidden space-y-3">
+      <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs space-y-2">
+        <label class="block text-[10px] font-bold text-slate-600">Pilih Tugas yang Dikerjakan:</label>
+        <select id="alur-task-select" onchange="gantiTugasAlur(this.value)" class="w-full text-xs font-bold border-slate-300 rounded-lg focus:ring-gov-700 focus:border-gov-700"></select>
+
+        <div class="bg-gov-50 border border-gov-200 rounded-lg p-2 space-y-1 text-[10px]">
+          <div class="flex items-center justify-between">
+            <span id="alur-badge-code" class="bg-gov-700 text-white font-extrabold px-1.5 py-0.2 rounded text-[9px]">TGS-000</span>
+            <span id="alur-deadline" class="text-gov-800 font-bold"><i class="fa-regular fa-clock mr-1"></i>Tenggat: -</span>
+          </div>
+          <div class="flex items-center justify-between text-slate-600 pt-0.5">
+            <span>Dari: <strong id="alur-creator" class="text-slate-800">-</strong></span>
+            <span>Progres: <strong id="alur-progress" class="text-gov-800">-</strong></span>
+          </div>
+          <div class="text-slate-600">Pelaksana: <strong id="alur-assignee" class="text-gov-800">-</strong></div>
+        </div>
+      </div>
+
+      <!-- 5 TAHAP SOP -->
+      <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-xs">
+        <h3 class="font-extrabold text-xs text-slate-800 mb-2.5 flex items-center">
+          <i class="fa-solid fa-list-check text-gov-700 mr-1.5"></i>5 Tahapan SOP Kinerja Desa
+        </h3>
+        <div id="alur-stepper-box" class="relative pl-5 border-l-2 border-slate-200 space-y-2.5"></div>
+      </div>
+
+      <!-- FORM BUKTI & CATATAN -->
+      <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-xs space-y-2.5">
+        <h3 class="font-extrabold text-xs text-slate-800 flex items-center">
+          <i class="fa-solid fa-camera text-gov-700 mr-1.5"></i>Laporan Progres & Bukti Lapangan
+        </h3>
+
+        <textarea id="alur-note" rows="2" placeholder="Tuliskan catatan hasil pelaksanaan atau kendala lapangan..." class="w-full text-xs border-slate-300 rounded-lg focus:ring-gov-700 focus:border-gov-700"></textarea>
+
+        <div id="alur-stage-photos-preview"></div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <label class="bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-[10px] py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 cursor-pointer transition">
+            <i class="fa-solid fa-camera text-gov-700"></i>
+            <span>Ambil / Pilih Foto</span>
+            <input type="file" accept="image/*" capture="environment" onchange="handleFotoUpload(event)" class="hidden">
+          </label>
+          <button type="button" onclick="simpanCatatanAlur()" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-gov-800 font-bold text-[10px] py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Simpan Catatan</span>
+          </button>
+        </div>
+
+        <button id="btn-naik-tahap" type="button" onclick="eksekusiNaikTahap()" class="w-full bg-gov-700 hover:bg-gov-800 text-white font-extrabold py-3 rounded-xl shadow flex items-center justify-center space-x-2 transition text-xs">
+          <i class="fa-solid fa-arrow-up-right-dots"></i>
+          <span id="btn-naik-label">Tingkatkan Tahap</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: CAPAIAN SKP ==================== -->
+    <section id="view-capaian" class="hidden space-y-3">
+      <div class="bg-gradient-to-br from-gov-800 to-emerald-800 text-white rounded-xl p-3.5 shadow">
+        <div class="flex items-center space-x-3">
+          <div id="cap-avatar" class="w-11 h-11 rounded-full bg-amber-400 text-slate-900 font-extrabold text-base flex items-center justify-center shadow">N</div>
+          <div>
+            <p class="text-[9px] text-emerald-200 uppercase font-bold">Rapor Kinerja Aparatur</p>
+            <h3 id="cap-nama" class="font-extrabold text-sm">Naning Lestari</h3>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 mt-3 pt-2.5 border-t border-white/15 text-center">
+          <div>
+            <p id="skp-score" class="font-extrabold text-base text-amber-300">94.2%</p>
+            <p class="text-[9px] text-emerald-100">Indeks SKP</p>
+          </div>
+          <div>
+            <p id="skp-durasi" class="font-extrabold text-base">1.4 Hari</p>
+            <p class="text-[9px] text-emerald-100">Rata-rata Tuntas</p>
+          </div>
+          <div>
+            <p id="skp-rank" class="font-extrabold text-base text-emerald-300">#3 <span class="text-[9px] font-normal text-emerald-200">/ 11</span></p>
+            <p class="text-[9px] text-emerald-100">Peringkat Desa</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-xs space-y-2">
+        <h3 class="font-extrabold text-xs text-slate-800 flex items-center">
+          <i class="fa-solid fa-trophy text-amber-500 mr-1.5"></i>Peringkat Kinerja 11 Aparatur Pemdes
+        </h3>
+        <div id="leaderboard-box" class="space-y-1.5"></div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: MONITORING PIMPINAN ==================== -->
+    <section id="view-monitoring" class="hidden space-y-3">
+      <!-- TAMPILAN TERKUNCI UNTUK NON-PIMPINAN -->
+      <div id="mon-locked-container" class="hidden bg-white border border-slate-200 rounded-xl p-6 text-center space-y-2 shadow-xs">
+        <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto text-lg">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h3 class="font-extrabold text-sm text-slate-800">Akses Khusus Pimpinan & Otorisator</h3>
+        <p class="text-xs text-slate-500">Menu monitoring menyeluruh hanya dapat diakses oleh Kepala Desa, Sekretaris Desa, dan Kaur Keuangan.</p>
+      </div>
+
+      <!-- TAMPILAN MONITORING PIMPINAN -->
+      <div id="mon-leader-container" class="space-y-3">
+        <div class="grid grid-cols-4 gap-1.5 text-center">
+          <div class="bg-white border border-slate-200 rounded-xl p-2">
+            <p id="mon-stat-total" class="font-extrabold text-sm text-slate-800">0</p>
+            <p class="text-[8px] text-slate-500 font-bold">Total Tugas</p>
+          </div>
+          <div class="bg-blue-50 border border-blue-200 rounded-xl p-2">
+            <p id="mon-stat-jalan" class="font-extrabold text-sm text-blue-700">0</p>
+            <p class="text-[8px] text-blue-800 font-bold">Tahap 1-2</p>
+          </div>
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-2">
+            <p id="mon-stat-bukti" class="font-extrabold text-sm text-amber-700">0</p>
+            <p class="text-[8px] text-amber-800 font-bold">Tahap 3-4</p>
+          </div>
+          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2">
+            <p id="mon-stat-sah" class="font-extrabold text-sm text-emerald-700">0</p>
+            <p class="text-[8px] text-emerald-800 font-bold">Sah 100%</p>
+          </div>
+        </div>
+
+        <!-- FILTER MONITORING -->
+        <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold text-slate-700">Filter Monitoring (<span id="mon-item-count">0</span> Tugas)</span>
+            <button onclick="resetMonitoringFilter()" class="text-[9px] text-gov-700 font-bold hover:underline">Reset Filter</button>
+          </div>
+
+          <select id="mon-filter-aparatur" onchange="applyMonitoringFilter()" class="w-full text-[11px] font-semibold border-slate-300 rounded-lg py-1.5"></select>
+
+          <div class="grid grid-cols-4 gap-1 text-[9px] font-bold">
+            <button onclick="setMonStage('semua', this)" class="mon-stage-btn bg-gov-700 text-white p-1 rounded-md border transition text-center">Semua</button>
+            <button onclick="setMonStage('20-40', this)" class="mon-stage-btn bg-slate-100 text-slate-700 p-1 rounded-md border border-slate-200 transition text-center">20-40%</button>
+            <button onclick="setMonStage('60-80', this)" class="mon-stage-btn bg-slate-100 text-slate-700 p-1 rounded-md border border-slate-200 transition text-center">60-80%</button>
+            <button onclick="setMonStage('100', this)" class="mon-stage-btn bg-slate-100 text-slate-700 p-1 rounded-md border border-slate-200 transition text-center">100% Sah</button>
+          </div>
+
+          <div class="flex items-center space-x-1 text-[9px] font-bold">
+            <button onclick="setMonCat('semua', this)" class="mon-cat-btn bg-gov-700 text-white px-2 py-0.5 rounded flex-1 text-center">Semua</button>
+            <button onclick="setMonCat('kades', this)" class="mon-cat-btn bg-slate-100 text-slate-700 px-2 py-0.5 rounded flex-1 text-center">Pimpinan</button>
+            <button onclick="setMonCat('mandiri', this)" class="mon-cat-btn bg-slate-100 text-slate-700 px-2 py-0.5 rounded flex-1 text-center">Mandiri</button>
+            <button onclick="setMonCat('notulen', this)" class="mon-cat-btn bg-slate-100 text-slate-700 px-2 py-0.5 rounded flex-1 text-center">Musdes</button>
+          </div>
+        </div>
+
+        <div id="mon-task-list" class="space-y-2"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- NAVIGASI BAWAH -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-30 shadow-lg">
+    <div class="max-w-md mx-auto flex items-center justify-around py-1.5">
+      <button id="nav-tugas" onclick="switchTab('tugas')" class="flex-1 flex flex-col items-center text-gov-700 font-bold transition py-1">
+        <i class="fa-solid fa-clipboard-list text-base"></i>
+        <span class="text-[9px] mt-0.5">Tugas Saya</span>
+      </button>
+      <button id="nav-alur" onclick="switchTab('alur')" class="flex-1 flex flex-col items-center text-slate-400 font-medium hover:text-gov-700 transition py-1">
+        <i class="fa-solid fa-diagram-project text-base"></i>
+        <span class="text-[9px] mt-0.5">Update Alur</span>
+      </button>
+      <button id="nav-capaian" onclick="switchTab('capaian')" class="flex-1 flex flex-col items-center text-slate-400 font-medium hover:text-gov-700 transition py-1">
+        <i class="fa-solid fa-award text-base"></i>
+        <span class="text-[9px] mt-0.5">Capaian SKP</span>
+      </button>
+      <button id="nav-monitoring" onclick="switchTab('monitoring')" class="flex-1 flex flex-col items-center text-slate-400 font-medium hover:text-gov-700 transition py-1">
+        <i class="fa-solid fa-eye text-base"></i>
+        <span class="text-[9px] mt-0.5">Monitoring</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== MODAL 1: GANTI AKUN APARATUR ==================== -->
+  <div id="modal-ganti-akun" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 flex items-end sm:items-center justify-center p-3">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden max-h-[85vh] flex flex-col">
+      <div class="p-3 bg-gov-700 text-white flex items-center justify-between">
+        <div>
+          <h3 class="font-extrabold text-xs">Pilih Akun Aparatur Desa</h3>
+          <p class="text-[9px] text-emerald-200">Pemdes Sumengko, Kwadungan, Ngawi</p>
+        </div>
+        <button onclick="tutupModalGantiAkun()" class="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center text-xs"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="modal-aparatur-list" class="p-3 space-y-1.5 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: OTENTIKASI PIN 6 DIGIT ==================== -->
+  <div id="modal-pin-auth" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-xs rounded-2xl shadow-2xl p-4 text-center space-y-3">
+      <div class="w-11 h-11 rounded-full bg-gov-700 text-white font-extrabold text-base flex items-center justify-center mx-auto" id="pin-target-avatar">A</div>
+      <div>
+        <span id="pin-target-jabatan" class="text-[9px] bg-emerald-100 text-gov-800 font-bold px-2 py-0.5 rounded-full">Jabatan</span>
+        <h4 id="pin-target-nama" class="font-extrabold text-xs text-slate-900 mt-1">Nama Aparatur</h4>
+        <p class="text-[9px] text-slate-400 mt-0.5">PIN Standar: <strong id="pin-hint-text" class="text-slate-600">000000</strong></p>
+      </div>
+
+      <div class="flex items-center justify-center space-x-2.5 py-1">
+        <span id="pdot-0" class="w-3 h-3 rounded-full border-2 border-slate-300 bg-white"></span>
+        <span id="pdot-1" class="w-3 h-3 rounded-full border-2 border-slate-300 bg-white"></span>
+        <span id="pdot-2" class="w-3 h-3 rounded-full border-2 border-slate-300 bg-white"></span>
+        <span id="pdot-3" class="w-3 h-3 rounded-full border-2 border-slate-300 bg-white"></span>
+        <span id="pdot-4" class="w-3 h-3 rounded-full border-2 border-slate-300 bg-white"></span>
+        <span id="pdot-5" class="w-3 h-3 rounded-full border-2 border-slate-300 bg-white"></span>
+      </div>
+
+      <p id="pin-error-msg" class="hidden text-[10px] text-red-600 font-bold">PIN tidak sesuai! Silakan ulangi.</p>
+
+      <div class="grid grid-cols-3 gap-2 pt-1 font-extrabold text-sm text-slate-800">
+        <button type="button" onclick="tekanKeypad('1')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">1</button>
+        <button type="button" onclick="tekanKeypad('2')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">2</button>
+        <button type="button" onclick="tekanKeypad('3')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">3</button>
+        <button type="button" onclick="tekanKeypad('4')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">4</button>
+        <button type="button" onclick="tekanKeypad('5')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">5</button>
+        <button type="button" onclick="tekanKeypad('6')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">6</button>
+        <button type="button" onclick="tekanKeypad('7')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">7</button>
+        <button type="button" onclick="tekanKeypad('8')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">8</button>
+        <button type="button" onclick="tekanKeypad('9')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">9</button>
+        <button type="button" onclick="resetPinInput()" class="bg-amber-50 text-amber-700 text-xs py-2.5 rounded-xl">Reset</button>
+        <button type="button" onclick="tekanKeypad('0')" class="bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl">0</button>
+        <button type="button" onclick="hapusDigitPin()" class="bg-red-50 text-red-600 text-xs py-2.5 rounded-xl"><i class="fa-solid fa-delete-left"></i></button>
+      </div>
+
+      <button type="button" onclick="tutupModalPin()" class="w-full text-xs font-bold text-slate-400 hover:text-slate-600 pt-1">Batal</button>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: BUAT TUGAS BARU ==================== -->
+  <div id="modal-buat-tugas" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 flex items-end sm:items-center justify-center p-3">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="p-3 bg-gov-700 text-white flex items-center justify-between">
+        <h3 class="font-extrabold text-xs"><i class="fa-solid fa-plus-circle mr-1.5"></i>Buat Disposisi / Tugas Baru</h3>
+        <button onclick="tutupModalBuatTugas()" class="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center text-xs"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="p-3.5 space-y-2.5 overflow-y-auto text-xs">
+        <div id="banner-form-non-atasan" class="hidden bg-amber-50 border border-amber-200 text-amber-800 p-2 rounded-lg text-[10px]">
+          <i class="fa-solid fa-circle-info mr-1"></i>Mode Pelaksana: Anda dapat mencatat tugas inisiatif mandiri atau hasil notulen musyawarah desa.
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-slate-700 mb-1">Sumber / Kategori Tugas</label>
+          <select id="select-task-source" onchange="handleFormSourceChange()" class="w-full text-xs border-slate-300 rounded-lg"></select>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-[10px] font-bold text-slate-700">Pelaksana Tugas</label>
+            <span id="label-assignee-locked" class="hidden text-[9px] text-amber-700 font-bold">Otomatis Diri Sendiri</span>
+          </div>
+          <select id="select-task-assignee" class="w-full text-xs border-slate-300 rounded-lg"></select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-slate-700 mb-1">Judul Tugas / Kegiatan *</label>
+          <input type="text" id="input-task-title" placeholder="Contoh: Penyusunan SPJ Kegiatan Fisik..." class="w-full text-xs border-slate-300 rounded-lg">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-bold text-slate-700 mb-1">Prioritas</label>
+            <select id="select-task-priority" class="w-full text-xs border-slate-300 rounded-lg">
+              <option value="Tinggi">Tinggi (Mendesak)</option>
+              <option value="Normal" selected>Normal</option>
+              <option value="Rutin">Rutin</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-700 mb-1">Tenggat Waktu</label>
+            <input type="text" id="input-task-deadline" placeholder="Besok (15.00 WIB)" class="w-full text-xs border-slate-300 rounded-lg">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-slate-700 mb-1">Arahan / Uraian Pekerjaan</label>
+          <textarea id="input-task-desc" rows="2" placeholder="Detail instruksi pelaksanaan..." class="w-full text-xs border-slate-300 rounded-lg"></textarea>
+        </div>
+      </div>
+
+      <div class="p-3 bg-slate-50 border-t border-slate-200 flex space-x-2">
+        <button onclick="tutupModalBuatTugas()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-xs">Batal</button>
+        <button onclick="simpanTugasBaru()" class="flex-1 bg-gov-700 hover:bg-gov-800 text-white font-bold py-2 rounded-xl text-xs shadow">Simpan & Kirim</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 4: DETAIL UNIT TUGAS ==================== -->
+  <div id="modal-unit-detail" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 flex items-end sm:items-center justify-center p-3">
+    <div class="bg-slate-50 w-full max-w-md rounded-2xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="p-3 bg-gov-700 text-white flex items-center justify-between">
+        <h3 id="unit-detail-title" class="font-extrabold text-xs">Detail Unit Tugas</h3>
+        <button onclick="tutupUnitDetailModal()" class="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center text-xs"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="unit-detail-body" class="p-3 space-y-2.5 overflow-y-auto"></div>
+      <div id="unit-detail-footer" class="p-3 bg-white border-t border-slate-200 flex items-center space-x-2"></div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 5: KONFIRMASI HAPUS TUGAS ==================== -->
+  <div id="modal-konfirmasi-hapus" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-xs rounded-2xl shadow-xl p-4 text-center space-y-3">
+      <div class="w-11 h-11 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto text-lg">
+        <i class="fa-solid fa-trash-can"></i>
+      </div>
+      <div>
+        <span id="del-task-code" class="text-[9px] bg-red-50 text-red-700 font-bold px-2 py-0.5 rounded">TGS-000</span>
+        <h4 class="font-extrabold text-xs text-slate-900 mt-1">Hapus Permanen Tugas Ini?</h4>
+        <p id="del-task-title" class="text-[10px] text-slate-500 mt-1 line-clamp-2">Judul Tugas</p>
+      </div>
+      <div class="flex space-x-2 pt-1">
+        <button onclick="tutupModalHapus()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-xs">Batal</button>
+        <button onclick="konfirmasiHapusSekdes()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-xl text-xs shadow">Ya, Hapus</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // ==============================================================
+  // ==============================================================
   // ENGINE PENYIMPANAN GOOGLE DRIVE (VIA GOOGLE APPS SCRIPT)
   // ==============================================================
   const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwKldHppcO-2AZ4e_B3vS86BF1U_WUGoOWe8TdVt6eIwY7fyAl62DqYyk2CIAuYcq_eqg/exec";
   const LS_TASKS_KEY = 'desatask_sumengko_tasks_v1';
   const LS_USER_KEY = 'desatask_sumengko_user_id_v1';
-
-  function loadTasksFromLocal() {
-    try {
-      const saved = localStorage.getItem(LS_TASKS_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch (e) {
-      console.error("Gagal membaca localStorage:", e);
-    }
-    return JSON.parse(JSON.stringify(DEFAULT_TASKS));
-  }
-
-  function saveTasksToLocal() {
-    try {
-      localStorage.setItem(LS_TASKS_KEY, JSON.stringify(TASKS));
-    } catch (e) {
-      console.warn("Kapasitas localStorage penuh:", e);
-    }
-  }
-
-  // Mengirim perubahan satu tugas (atau foto bukti) ke Google Drive
-  async function syncSingleTaskToCloud(task) {
-    saveTasksToLocal();
-    if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
-
-    try {
-      const response = await fetch(GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'upsert', task: task })
-      });
-      const result = await response.json();
-      if (result.status === 'ok' && Array.isArray(result.tasks)) {
-        TASKS = result.tasks;
-        saveTasksToLocal();
-        renderAlurView(activeTaskId);
-        renderMonitoringView();
-      }
-    } catch (err) {
-      console.warn("Offline / gagal kirim ke Google Drive:", err);
-      showToast("Tersimpan di HP (akan disinkronkan saat sinyal stabil).");
-    }
-  }
-
-  // Menghapus tugas permanen dari file JSON di Google Drive
-  async function deleteSingleTaskFromCloud(taskId) {
-    saveTasksToLocal();
-    if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
-
-    try {
-      await fetch(GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'delete', taskId: taskId })
-      });
-    } catch (err) {
-      console.warn("Gagal menghapus di Google Drive:", err);
-    }
-  }
-
-  // Mengambil data terbaru dari Google Drive saat aplikasi dibuka & berkala tiap 15 detik
-  async function initDriveSync() {
-    if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
-
-    const fetchFromDrive = async () => {
-      try {
-        const res = await fetch(GAS_WEB_APP_URL);
-        const cloudTasks = await res.json();
-
-        // Jika file desatask_db.json di Google Drive masih kosong, isi data bawaan
-        if (Array.isArray(cloudTasks) && cloudTasks.length === 0) {
-          await fetch(GAS_WEB_APP_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'seed', tasks: TASKS })
-          });
-          return;
-        }
-
-        if (Array.isArray(cloudTasks) && cloudTasks.length > 0) {
-          TASKS = cloudTasks;
-          saveTasksToLocal();
-          renderUserTaskList();
-          renderAlurView(activeTaskId);
-          renderMonitoringView();
-        }
-      } catch (err) {
-        console.warn("Sinkronisasi Google Drive tertunda:", err);
-      }
-    };
-
-    await fetchFromDrive();
-    setInterval(fetchFromDrive, 15000); // Cek pembaruan dari aparatur lain tiap 15 detik
-  }
 
   // 1. DATA MASTER 11 APARATUR PEMDES SUMENGKO
   const APARATUR = [
@@ -401,7 +750,7 @@
   ];
 
   // ==============================================================
-  // ENGINE PENYIMPANAN HYBRID (LOCALSTORAGE + FIREBASE FIRESTORE)
+  // FUNGSI SINKRONISASI GOOGLE DRIVE (APPS SCRIPT) + LOCALSTORAGE
   // ==============================================================
   function loadTasksFromLocal() {
     try {
@@ -426,59 +775,77 @@
 
   async function syncSingleTaskToCloud(task) {
     saveTasksToLocal();
-    if (!db) return;
+    if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
+
     try {
-      await db.collection('desatask_tasks').doc(String(task.id)).set(task);
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'upsert', task: task })
+      });
+      const result = await response.json();
+      if (result.status === 'ok' && Array.isArray(result.tasks)) {
+        TASKS = result.tasks;
+        saveTasksToLocal();
+        renderUserTaskList();
+        renderAlurView(activeTaskId);
+        renderMonitoringView();
+      }
     } catch (err) {
-      console.error("Gagal kirim ke Firestore (tersimpan di lokal):", err);
+      console.warn("Offline / gagal kirim ke Google Drive:", err);
       showToast("Tersimpan di HP (akan disinkronkan saat sinyal stabil).");
     }
   }
 
   async function deleteSingleTaskFromCloud(taskId) {
     saveTasksToLocal();
-    if (!db) return;
+    if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
+
     try {
-      await db.collection('desatask_tasks').doc(String(taskId)).delete();
+      await fetch(GAS_WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'delete', taskId: taskId })
+      });
     } catch (err) {
-      console.error("Gagal hapus di Firestore:", err);
+      console.warn("Gagal menghapus di Google Drive:", err);
     }
   }
 
-  function initDriveSync() {
-    if (!db) return;
-    db.collection('desatask_tasks').onSnapshot(async (snapshot) => {
-      // Jika database Firestore masih kosong saat pertama kali dipakai, unggah data bawaan
-      if (snapshot.empty) {
-        const batch = db.batch();
-        TASKS.forEach(t => {
-          const ref = db.collection('desatask_tasks').doc(String(t.id));
-          batch.set(ref, t);
-        });
-        await batch.commit();
-        return;
+  async function initDriveSync() {
+    if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
+
+    const fetchFromDrive = async () => {
+      try {
+        const res = await fetch(GAS_WEB_APP_URL);
+        const cloudTasks = await res.json();
+
+        if (Array.isArray(cloudTasks) && cloudTasks.length === 0) {
+          await fetch(GAS_WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'seed', tasks: TASKS })
+          });
+          return;
+        }
+
+        if (Array.isArray(cloudTasks) && cloudTasks.length > 0) {
+          TASKS = cloudTasks;
+          saveTasksToLocal();
+          renderUserTaskList();
+          renderAlurView(activeTaskId);
+          renderMonitoringView();
+          if (inspectedTaskId && !document.getElementById('modal-unit-detail').classList.contains('hidden')) {
+            bukaUnitDetailModal(inspectedTaskId);
+          }
+        }
+      } catch (err) {
+        console.warn("Sinkronisasi Google Drive tertunda:", err);
       }
+    };
 
-      const cloudTasks = [];
-      snapshot.forEach((doc) => {
-        cloudTasks.push(doc.data());
-      });
-
-      // Urutkan tugas terbaru di atas berdasarkan ID
-      cloudTasks.sort((a, b) => b.id - a.id);
-      TASKS = cloudTasks;
-      saveTasksToLocal();
-
-      // Segarkan tampilan secara realtime
-      renderUserTaskList();
-      renderAlurView(activeTaskId);
-      renderMonitoringView();
-      if (inspectedTaskId && !document.getElementById('modal-unit-detail').classList.contains('hidden')) {
-        bukaUnitDetailModal(inspectedTaskId);
-      }
-    }, (error) => {
-      console.warn("Listener Firestore terputus sementara:", error);
-    });
+    await fetchFromDrive();
+    setInterval(fetchFromDrive, 15000);
   }
 
   // Muat State Pengguna & Tugas dari LocalStorage
@@ -714,7 +1081,6 @@
     const note = document.getElementById('alur-note');
     if (note) note.value = t.proofNote || '';
 
-    // Tampilkan pratinjau foto jika sudah ada bukti foto pada tahap ini
     const photoPreview = document.getElementById('alur-stage-photos-preview');
     if (photoPreview) {
       photoPreview.innerHTML = t.proofImg ? `
@@ -730,10 +1096,10 @@
     if (t.stage < 5) {
       const nextNum = t.stage + 1;
       labelNaik.innerText = `Tingkatkan ke Tahap ${nextNum}: ${SOP_STEPS[nextNum - 1].title}`;
-      btnNaik.className = "w-full bg-gov-700 hover:bg-gov-800 text-white font-extrabold py-3 rounded-xl shadow flex items-center justify-center space-x-2 transition";
+      btnNaik.className = "w-full bg-gov-700 hover:bg-gov-800 text-white font-extrabold py-3 rounded-xl shadow flex items-center justify-center space-x-2 transition text-xs";
     } else {
       labelNaik.innerText = "Tugas Selesai Penuh (100% Pengesahan Pimpinan)";
-      btnNaik.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl shadow flex items-center justify-center space-x-2 transition";
+      btnNaik.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl shadow flex items-center justify-center space-x-2 transition text-xs";
     }
   }
 
@@ -817,7 +1183,6 @@
     }
   }
 
-  // Kompresi otomatis gambar dari HP agar aman disimpan di Firestore (< 150 KB)
   function compressImageToDataURL(file, maxWidth = 800, quality = 0.65) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -851,7 +1216,7 @@
     const t = TASKS.find(x => x.id === activeTaskId);
     if (!t) return;
 
-    showToast("Mengompresi & menyimpan foto bukti...");
+    showToast("Mengompresi & menyimpan foto bukti ke Drive...");
     try {
       const compressedDataUrl = await compressImageToDataURL(file);
       t.proofImg = compressedDataUrl;
@@ -868,30 +1233,10 @@
       await syncSingleTaskToCloud(t);
       renderAlurView(t.id);
       renderMonitoringView();
-      showToast(`Foto "${file.name}" tersimpan permanen!`);
+      showToast(`Foto "${file.name}" tersimpan di Google Drive!`);
     } catch (err) {
       showToast("Gagal memproses gambar. Coba file lain.");
     }
-  }
-
-  function unggahFotoBukti() {
-    const t = TASKS.find(x => x.id === activeTaskId);
-    if (!t) return;
-    t.proofImg = "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=700&q=80";
-    t.hasProof = true;
-    t.lastUpdated = "Baru saja";
-    if (!t.proofNote) t.proofNote = `Foto bukti dokumen fisik dilampirkan oleh ${currentUser.nama}`;
-    if (!t.history) t.history = [];
-    t.history.push({
-      time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
-      actor: currentUser.nama,
-      note: "Melampirkan bukti fisik / foto GPS lapangan.",
-      stage: t.stage
-    });
-    syncSingleTaskToCloud(t);
-    renderAlurView(t.id);
-    renderMonitoringView();
-    showToast("Bukti foto dinas berhasil disimpan!");
   }
 
   // ==============================================================
@@ -1054,7 +1399,7 @@
   }
 
   // ==============================================================
-  // UNIT MANDIRI: MODAL DETAIL & RIWAYAT TUGAS BERDIRI SENDIRI
+  // MODAL DETAIL & RIWAYAT TUGAS
   // ==============================================================
   let inspectedTaskId = null;
 
@@ -1233,7 +1578,7 @@
     showToast("Feedback pimpinan berhasil disimpan!");
   }
 
-  // Switch Akun Cepat & Simpan Sesi Pengguna ke localStorage
+  // Switch Akun Cepat
   function switchAparatur(targetId) {
     const target = APARATUR.find(a => a.id === targetId);
     if (!target) return;
