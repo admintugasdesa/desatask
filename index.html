@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>DesaTask - Kinerja & Akuntabilitas Pemdes Sumengko, Kwadungan, Ngawi</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0f5132">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DesaTask">
+  <link rel="apple-touch-icon" href="./icons/icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script>
+    // ==============================================================
+  // ENGINE PENYIMPANAN GOOGLE DRIVE (VIA GOOGLE APPS SCRIPT)
+  // ==============================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwKldHppcO-2AZ4e_B3vS86BF1U_WUGoOWe8TdVt6eIwY7fyAl62DqYyk2CIAuYcq_eqg/exec";
+  const LS_TASKS_KEY = 'desatask_sumengko_tasks_v1';
+  const LS_USER_KEY = 'desatask_sumengko_user_id_v1';
+
+  function loadTasksFromLocal() {
+    try {
+      const saved = localStorage.getItem(LS_TASKS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error("Gagal membaca localStorage:", e);
+    }
+    return JSON.parse(JSON.stringify(DEFAULT_TASKS));
+  }
+
+  function saveTasksToLocal() {
+    try {
+      localStorage.setItem(LS_TASKS_KEY, JSON.stringify(TASKS));
+    } catch (e) {
+      console.warn("Kapasitas localStorage penuh:", e);
+    }
+  }
+
+  // Mengirim perubahan satu tugas (atau foto bukti) ke Google Drive
+  async function syncSingleTaskToCloud(task) {
+    saveTasksToLocal();
+    if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'upsert', task: task })
+      });
+      const result = await response.json();
+      if (result.status === 'ok' && Array.isArray(result.tasks)) {
+        TASKS = result.tasks;
+        saveTasksToLocal();
+        renderAlurView(activeTaskId);
+        renderMonitoringView();
+      }
+    } catch (err) {
+      console.warn("Offline / gagal kirim ke Google Drive:", err);
+      showToast("Tersimpan di HP (akan disinkronkan saat sinyal stabil).");
+    }
+  }
+
+  // Menghapus tugas permanen dari file JSON di Google Drive
+  async function deleteSingleTaskFromCloud(taskId) {
+    saveTasksToLocal();
+    if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
+
+    try {
+      await fetch(GAS_WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'delete', taskId: taskId })
+      });
+    } catch (err) {
+      console.warn("Gagal menghapus di Google Drive:", err);
+    }
+  }
+
+  // Mengambil data terbaru dari Google Drive saat aplikasi dibuka & berkala tiap 15 detik
+  async function initDriveSync() {
+    if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
+
+    const fetchFromDrive = async () => {
+      try {
+        const res = await fetch(GAS_WEB_APP_URL);
+        const cloudTasks = await res.json();
+
+        // Jika file desatask_db.json di Google Drive masih kosong, isi data bawaan
+        if (Array.isArray(cloudTasks) && cloudTasks.length === 0) {
+          await fetch(GAS_WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'seed', tasks: TASKS })
+          });
+          return;
+        }
+
+        if (Array.isArray(cloudTasks) && cloudTasks.length > 0) {
+          TASKS = cloudTasks;
+          saveTasksToLocal();
+          renderUserTaskList();
+          renderAlurView(activeTaskId);
+          renderMonitoringView();
+        }
+      } catch (err) {
+        console.warn("Sinkronisasi Google Drive tertunda:", err);
+      }
+    };
+
+    await fetchFromDrive();
+    setInterval(fetchFromDrive, 15000); // Cek pembaruan dari aparatur lain tiap 15 detik
+  }
+
+  // 1. DATA MASTER 11 APARATUR PEMDES SUMENGKO
+  const APARATUR = [
+    { id: 1, nama: "Drs. H. SUMARLI, M.Ag", jabatan: "Kepala Desa", role: "Pimpinan Tertinggi", badge: "Kades", score: 98.5, durasi: "1.1 Hari", pin: "112233", hasSubordinates: true, isLeader: true },
+    { id: 2, nama: "Herman Dwi Novianto, ST", jabatan: "Sekretaris Desa", role: "Koordinator Tim", badge: "Sekdes", score: 96.8, durasi: "1.2 Hari", pin: "223344", hasSubordinates: true, isLeader: true },
+    { id: 3, nama: "Naning Lestari", jabatan: "Kaur Keuangan", role: "Otorisator Keuangan", badge: "Kaur Keu", score: 94.2, durasi: "1.4 Hari", pin: "334455", hasSubordinates: true, isLeader: true },
+    { id: 4, nama: "Galuh Rismawati, SE", jabatan: "Kaur Umum", role: "Staf Tata Usaha", badge: "Kaur Umum", score: 92.4, durasi: "1.5 Hari", pin: "445566", hasSubordinates: false, isLeader: false },
+    { id: 5, nama: "Ramli Nur Aziza", jabatan: "Kaur Perencanaan", role: "Staf Perencanaan", badge: "Kaur Ren", score: 91.0, durasi: "1.6 Hari", pin: "556677", hasSubordinates: false, isLeader: false },
+    { id: 6, nama: "Lugas Khalid Maulana", jabatan: "Kasi Pemerintahan", role: "Pelaksana Teknis", badge: "Kasi Pem", score: 89.5, durasi: "1.8 Hari", pin: "667788", hasSubordinates: false, isLeader: false },
+    { id: 7, nama: "Puspita Sari Handayani, SE", jabatan: "Kasi Kesejahteraan", role: "Pelaksana Teknis", badge: "Kasi Kesra", score: 88.7, durasi: "1.7 Hari", pin: "778899", hasSubordinates: false, isLeader: false },
+    { id: 8, nama: "Shoim Syah", jabatan: "Kasi Pelayanan", role: "Pelaksana Teknis", badge: "Kasi Yan", score: 93.1, durasi: "1.3 Hari", pin: "889900", hasSubordinates: false, isLeader: false },
+    { id: 9, nama: "Bowo Witono", jabatan: "Kasun Blok A", role: "Kewilayahan", badge: "Kadus A", score: 90.2, durasi: "1.5 Hari", pin: "123456", hasSubordinates: false, isLeader: false },
+    { id: 10, nama: "Agus Setiawan, Spd", jabatan: "Kasun Blok B", role: "Kewilayahan", badge: "Kadus B", score: 89.1, durasi: "1.9 Hari", pin: "234567", hasSubordinates: false, isLeader: false },
+    { id: 11, nama: "Ugeng Budi Prasetyo", jabatan: "Kasun Blok C", role: "Kewilayahan", badge: "Kadus C", score: 87.8, durasi: "2.0 Hari", pin: "345678", hasSubordinates: false, isLeader: false }
+  ];
+
+  // 2. 5 TAHAPAN STANDAR SOP KINERJA DESA
+  const SOP_STEPS = [
+    { step: 1, title: "Diterima & Pelajari Disposisi", percent: "20%", desc: "Disposisi resmi diterima pelaksana, verifikasi arahan tugas." },
+    { step: 2, title: "Persiapan & Telaah Dokumen", percent: "40%", desc: "Penyusunan instrumen kerja lapangan, buku kas, atau berkas pendukung." },
+    { step: 3, title: "Pelaksanaan & Rekonsiliasi", percent: "60%", desc: "Eksekusi teknis, pencocokan data rekening koran/fisik lapangan." },
+    { step: 4, title: "Unggah Bukti & Selesai", percent: "80%", desc: "Dokumen bukti dan lampiran nota digital siap diarsipkan." },
+    { step: 5, title: "Pengesahan Pimpinan", percent: "100%", desc: "Validasi penuh tanda tangan digital Kepala Desa / Sekdes." }
+  ];
+
+  // 3. DATA BAWAAN AWAL (SEED DATA)
+  const DEFAULT_TASKS = [
+    {
+      id: 1004,
+      code: "TGS-2025-004",
+      title: "Penyusunan Laporan Pertanggungjawaban Realisasi APBDes Triwulan I",
+      creator: "Herman Dwi Novianto, ST (Sekdes)",
+      assignee: "Naning Lestari",
+      category: "kades",
+      priority: "Tinggi",
+      deadline: "2 Hari lagi (15.00 WIB)",
+      stage: 2,
+      progress: "40%",
+      desc: "Rekonsiliasi buku kas pembantu, pajak PPN/PPh, serta rekap nota belanja modal sarana prasarana.",
+      location: "Ruang Kaur Keuangan Balai Desa",
+      lastUpdated: "Hari ini, 09.30 WIB",
+      hasProof: true,
+      proofNote: "Buku kas umum & rekening koran BPD Jatim telah dicocokkan bersama bendahara.",
+      proofImg: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=700&q=80",
+      leaderFeedback: "",
+      history: [
+        { time: "Kemarin, 08:15 WIB", actor: "Herman Dwi Novianto, ST", note: "Disposisi resmi diterbitkan untuk Kaur Keuangan.", stage: 1 },
+        { time: "Hari ini, 09:30 WIB", actor: "Naning Lestari", note: "Pengecekan nota pembantu dan print rekening koran bank Jatim rampung.", stage: 2 }
+      ]
+    },
+    {
+      id: 1005,
+      code: "TGS-2025-005",
+      title: "Verifikasi Berkas Pencairan BLT Dana Desa Tahap 1",
+      creator: "Herman Dwi Novianto, ST (Sekdes)",
+      assignee: "Naning Lestari",
+      category: "kades",
+      priority: "Normal",
+      deadline: "Besok (12.00 WIB)",
+      stage: 1,
+      progress: "20%",
+      desc: "Periksa kelengkapan SPJ dan presensi penerima manfaat BLT-DD Dusun Blok A & B.",
+      location: "Balai Desa Sumengko",
+      lastUpdated: "Hari ini, 08.00 WIB",
+      hasProof: false,
+      proofNote: "",
+      proofImg: "",
+      leaderFeedback: "",
+      history: [
+        { time: "Hari ini, 08:00 WIB", actor: "Herman Dwi Novianto, ST", note: "Instruksi verifikasi berkas pencairan BLT-DD.", stage: 1 }
+      ]
+    },
+    {
+      id: 9001,
+      code: "TGS-2025-048",
+      title: "Pendataan Fisik Saluran Drainase Dusun Blok A",
+      creator: "Herman Dwi Novianto, ST (Sekdes)",
+      assignee: "Bowo Witono",
+      category: "kades",
+      priority: "Tinggi",
+      deadline: "Hari ini (17.00 WIB)",
+      stage: 3,
+      progress: "60%",
+      desc: "Pengambilan dokumentasi geolokasi GPS lapangan dan pengukuran debit saluran sawah warga.",
+      location: "Dusun Krajan Blok A, Kwadungan",
+      lastUpdated: "Hari ini, 10.45 WIB",
+      hasProof: true,
+      proofNote: "Foto gorong-gorong RT 02 terdokumentasi, debit lancar.",
+      proofImg: "https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=700&q=80",
+      leaderFeedback: "Lanjutkan cek ke perbatasan Dusun Blok B.",
+      history: [
+        { time: "Kemarin, 14:00 WIB", actor: "Herman Dwi Novianto, ST", note: "Instruksi survei cek drainase musim hujan.", stage: 1 },
+        { time: "Hari ini, 08:30 WIB", actor: "Bowo Witono", note: "Persiapan meteran roll dan GPS koordinat ponsel.", stage: 2 },
+        { time: "Hari ini, 10:45 WIB", actor: "Bowo Witono", note: "Survei RT 02 selesai, debit air stabil, foto diunggah.", stage: 3 }
+      ]
+    },
+    {
+      id: 2001,
+      code: "TGS-2025-010",
+      title: "Harmonisasi Draf Regulasi Batas Teritori Dusun",
+      creator: "Drs. H. SUMARLI, M.Ag",
+      assignee: "Herman Dwi Novianto, ST",
+      category: "kades",
+      priority: "Tinggi",
+      deadline: "Besok (16.00 WIB)",
+      stage: 3,
+      progress: "60%",
+      desc: "Koordinasi dengan Bagian Hukum Setda Ngawi perihal batas pemukiman warga.",
+      location: "Ruang Sekretariat Desa",
+      lastUpdated: "Hari ini, 11.15 WIB",
+      hasProof: true,
+      proofNote: "Draf pasal 4 telah direvisi bersama staf Bagian Hukum.",
+      proofImg: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=700&q=80",
+      leaderFeedback: "",
+      history: [
+        { time: "Kemarin, 10:00 WIB", actor: "Drs. H. SUMARLI, M.Ag", note: "Penerbitan arahan harmonisasi aturan perdes.", stage: 1 },
+        { time: "Hari ini, 11:15 WIB", actor: "Herman Dwi Novianto, ST", note: "Konsultasi hukum selesai 60%.", stage: 3 }
+      ]
+    },
+    {
+      id: 4001,
+      code: "TGS-2025-018",
+      title: "Digitalisasi Arsip Buku Agenda Surat Masuk/Keluar",
+      creator: "Herman Dwi Novianto, ST (Sekdes)",
+      assignee: "Galuh Rismawati, SE",
+      category: "mandiri",
+      priority: "Normal",
+      deadline: "Lusa (14.00 WIB)",
+      stage: 4,
+      progress: "80%",
+      desc: "Scan seluruh berkas nota dinas masuk triwulan I ke format PDF drive desa.",
+      location: "Ruang Pelayanan",
+      lastUpdated: "Hari ini, 09.00 WIB",
+      hasProof: true,
+      proofNote: "78 lembar surat masuk sudah terscan rapi dalam drive.",
+      proofImg: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=700&q=80",
+      leaderFeedback: "",
+      history: [
+        { time: "Kemarin, 13:00 WIB", actor: "Galuh Rismawati, SE", note: "Pemindaian berkas dimulai.", stage: 2 },
+        { time: "Hari ini, 09:00 WIB", actor: "Galuh Rismawati, SE", note: "Unggah dokumen 80%, menunggu verifikasi Sekdes.", stage: 4 }
+      ]
+    },
+    {
+      id: 5001,
+      code: "TGS-2025-025",
+      title: "Penyusunan Draf Matriks RKP 2026",
+      creator: "Notulen Rapat Musdes",
+      assignee: "Ramli Nur Aziza",
+      category: "notulen",
+      priority: "Tinggi",
+      deadline: "3 Hari lagi (16.00 WIB)",
+      stage: 2,
+      progress: "40%",
+      desc: "Kompilasi usulan prioritas pertanian dan infrastruktur dari musrenbangdus.",
+      location: "Ruang BPD",
+      lastUpdated: "Hari ini, 08.45 WIB",
+      hasProof: false,
+      proofNote: "Tabulasi usulan sedang dikelompokkan.",
+      proofImg: "",
+      leaderFeedback: "",
+      history: [
+        { time: "Kemarin, 09:00 WIB", actor: "Musdes", note: "Notulen disahkan bersama BPD.", stage: 1 },
+        { time: "Hari ini, 08:45 WIB", actor: "Ramli Nur Aziza", note: "Tabulasi usulan dimulai.", stage: 2 }
+      ]
+    },
+    {
+      id: 6001,
+      code: "TGS-2025-031",
+      title: "Pembaruan Profil Kependudukan & PBB-P2",
+      creator: "Herman Dwi Novianto, ST (Sekdes)",
+      assignee: "Lugas Khalid Maulana",
+      category: "kades",
+      priority: "Normal",
+      deadline: "4 Hari lagi",
+      stage: 1,
+      progress: "20%",
+      desc: "Pencocokan data NIK ganda dan sinkronisasi SPPT dengan Kantor Pajak Ngawi.",
+      location: "Kecamatan Kwadungan",
+      lastUpdated: "Hari ini, 07.45 WIB",
+      hasProof: false,
+      proofNote: "",
+      proofImg: "",
+      leaderFeedback: "",
+      history: [
+        { time: "Hari ini, 07:45 WIB", actor: "Herman Dwi Novianto, ST", note: "Disposisi sinkronisasi data NIK.", stage: 1 }
+      ]
+    },
+    {
+      id: 7001,
+      code: "TGS-2025-037",
+      title: "Monitoring Pendistribusian PMT Balita Stunting",
+      creator: "Notulen Rapat Rembug Stunting",
+      assignee: "Puspita Sari Handayani, SE",
+      category: "notulen",
+      priority: "Tinggi",
+      deadline: "Besok (10.00 WIB)",
+      stage: 5,
+      progress: "100%",
+      desc: "Penyaluran telur dan vitamin gizi balita serta input aplikasi EHDW Kemendes.",
+      location: "Poskesdes Sumengko",
+      lastUpdated: "Hari ini, 11.30 WIB",
+      hasProof: true,
+      proofNote: "100% PMT tersalurkan kepada 14 balita target.",
+      proofImg: "https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=700&q=80",
+      leaderFeedback: "Sangat baik. Laporan disahkan 100%.",
+      history: [
+        { time: "Kemarin", actor: "Puspita Sari Handayani, SE", note: "Penyaluran serentak di posyandu.", stage: 4 },
+        { time: "Hari ini, 11:30 WIB", actor: "Drs. H. SUMARLI, M.Ag", note: "Pengesahan digital selesai penuh (100%).", stage: 5 }
+      ]
+    },
+    {
+      id: 8001,
+      code: "TGS-2025-042",
+      title: "Pelayanan Surat Keterangan Domisili Online",
+      creator: "Inisiatif Mandiri",
+      assignee: "Shoim Syah",
+      category: "mandiri",
+      priority: "Rutin",
+      deadline: "Hari ini (15.00 WIB)",
+      stage: 3,
+      progress: "60%",
+      desc: "Pelayanan registrasi administrasi pemohon surat keterangan beasiswa.",
+      location: "Loket Pelayanan",
+      lastUpdated: "Hari ini, 10.10 WIB",
+      hasProof: true,
+      proofNote: "10 berkas teregister ke buku besar.",
+      proofImg: "",
+      leaderFeedback: "",
+      history: [
+        { time: "Pagi tadi", actor: "Shoim Syah", note: "Mulai layanan administrasi.", stage: 1 },
+        { time: "Hari ini, 10:10 WIB", actor: "Shoim Syah", note: "10 berkas terlayani.", stage: 3 }
+      ]
+    },
+    {
+      id: 10001,
+      code: "TGS-2025-055",
+      title: "Pengawasan Patok Batas Tanah Kas Desa Dusun Blok B",
+      creator: "Drs. H. SUMARLI, M.Ag",
+      assignee: "Agus Setiawan, Spd",
+      category: "kades",
+      priority: "Normal",
+      deadline: "Lusa (16.00 WIB)",
+      stage: 2,
+      progress: "40%",
+      desc: "Pengecekan fisik batas lahan sewa bengkok dan koordinasi dengan penyewa lahan tani.",
+      location: "Blok B Sawah Kulon",
+      lastUpdated: "Kemarin, 16.00 WIB",
+      hasProof: false,
+      proofNote: "Penyewa sudah dihubungi.",
+      proofImg: "",
+      leaderFeedback: "",
+      history: [
+        { time: "Kemarin, 16:00 WIB", actor: "Drs. H. SUMARLI, M.Ag", note: "Instruksi tertib batas aset tanah kas desa.", stage: 1 }
+      ]
+    },
+    {
+      id: 11001,
+      code: "TGS-2025-061",
+      title: "Sosialisasi Kerja Bakti Saluran Irigasi Blok C",
+      creator: "Inisiatif Mandiri",
+      assignee: "Ugeng Budi Prasetyo",
+      category: "mandiri",
+      priority: "Normal",
+      deadline: "Besok (19.00 WIB)",
+      stage: 1,
+      progress: "20%",
+      desc: "Penyampaian surat edaran gotong royong kepada Ketua RT 01-04 Dusun Blok C.",
+      location: "Dusun Blok C",
+      lastUpdated: "Hari ini, 09.15 WIB",
+      hasProof: false,
+      proofNote: "",
+      proofImg: "",
+      leaderFeedback: "",
+      history: [
+        { time: "Hari ini, 09:15 WIB", actor: "Ugeng Budi Prasetyo", note: "Draf pengumuman dibuat di grup RT.", stage: 1 }
+      ]
+    }
+  ];
+
+  // ==============================================================
+  // ENGINE PENYIMPANAN HYBRID (LOCALSTORAGE + FIREBASE FIRESTORE)
+  // ==============================================================
+  function loadTasksFromLocal() {
+    try {
+      const saved = localStorage.getItem(LS_TASKS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error("Gagal membaca localStorage:", e);
+    }
+    return JSON.parse(JSON.stringify(DEFAULT_TASKS));
+  }
+
+  function saveTasksToLocal() {
+    try {
+      localStorage.setItem(LS_TASKS_KEY, JSON.stringify(TASKS));
+    } catch (e) {
+      console.warn("Kapasitas localStorage penuh:", e);
+    }
+  }
+
+  async function syncSingleTaskToCloud(task) {
+    saveTasksToLocal();
+    if (!db) return;
+    try {
+      await db.collection('desatask_tasks').doc(String(task.id)).set(task);
+    } catch (err) {
+      console.error("Gagal kirim ke Firestore (tersimpan di lokal):", err);
+      showToast("Tersimpan di HP (akan disinkronkan saat sinyal stabil).");
+    }
+  }
+
+  async function deleteSingleTaskFromCloud(taskId) {
+    saveTasksToLocal();
+    if (!db) return;
+    try {
+      await db.collection('desatask_tasks').doc(String(taskId)).delete();
+    } catch (err) {
+      console.error("Gagal hapus di Firestore:", err);
+    }
+  }
+
+  function initDriveSync() {
+    if (!db) return;
+    db.collection('desatask_tasks').onSnapshot(async (snapshot) => {
+      // Jika database Firestore masih kosong saat pertama kali dipakai, unggah data bawaan
+      if (snapshot.empty) {
+        const batch = db.batch();
+        TASKS.forEach(t => {
+          const ref = db.collection('desatask_tasks').doc(String(t.id));
+          batch.set(ref, t);
+        });
+        await batch.commit();
+        return;
+      }
+
+      const cloudTasks = [];
+      snapshot.forEach((doc) => {
+        cloudTasks.push(doc.data());
+      });
+
+      // Urutkan tugas terbaru di atas berdasarkan ID
+      cloudTasks.sort((a, b) => b.id - a.id);
+      TASKS = cloudTasks;
+      saveTasksToLocal();
+
+      // Segarkan tampilan secara realtime
+      renderUserTaskList();
+      renderAlurView(activeTaskId);
+      renderMonitoringView();
+      if (inspectedTaskId && !document.getElementById('modal-unit-detail').classList.contains('hidden')) {
+        bukaUnitDetailModal(inspectedTaskId);
+      }
+    }, (error) => {
+      console.warn("Listener Firestore terputus sementara:", error);
+    });
+  }
+
+  // Muat State Pengguna & Tugas dari LocalStorage
+  let TASKS = loadTasksFromLocal();
+  const savedUserId = parseInt(localStorage.getItem(LS_USER_KEY), 10);
+  let currentUser = APARATUR.find(a => a.id === savedUserId) || APARATUR[2];
+  let activeTaskId = null;
+  let monFilterAparatur = "semua";
+  let monFilterStage = "semua";
+  let monFilterCat = "semua";
+
+  // Inisialisasi
+  window.addEventListener('DOMContentLoaded', () => {
+    const initialUserTasks = getUserTasks();
+    activeTaskId = initialUserTasks.length > 0 ? initialUserTasks[0].id : (TASKS[0]?.id || null);
+
+    updateHeaderUI();
+    renderAparaturModal();
+    renderMonitoringAparaturOptions();
+    renderUserTaskList();
+    renderAlurView(activeTaskId);
+    renderLeaderboard();
+    renderMonitoringView();
+    checkRoleAccess();
+    updateQuickRoleButtons();
+    initDriveSync();
+    setupPWAInstallButton();
+  });
+
+  // Switch Tab
+  function switchTab(tabName) {
+    ['tugas', 'alur', 'capaian', 'monitoring'].forEach(t => {
+      const v = document.getElementById('view-' + t);
+      const b = document.getElementById('nav-' + t);
+      if (v) v.classList.toggle('hidden', t !== tabName);
+      if (b) {
+        b.className = t === tabName 
+          ? "flex-1 flex flex-col items-center text-gov-700 font-bold transition py-1"
+          : "flex-1 flex flex-col items-center text-slate-400 font-medium hover:text-gov-700 transition py-1";
+      }
+    });
+
+    if (tabName === 'alur') renderAlurView(activeTaskId);
+    else if (tabName === 'tugas') renderUserTaskList();
+    else if (tabName === 'monitoring') renderMonitoringView();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Filter Tugas Akun Aktif
+  function getUserTasks() {
+    const nameLower = currentUser.nama.toLowerCase();
+    const list = TASKS.filter(t => t.assignee.toLowerCase().includes(nameLower) || nameLower.includes(t.assignee.toLowerCase()));
+    if (list.length === 0) {
+      return [{
+        id: 9999,
+        code: "TGS-2025-099",
+        title: "Tugas Rutin Kedinasan " + currentUser.jabatan,
+        creator: "Pemdes Sumengko",
+        assignee: currentUser.nama,
+        category: "mandiri",
+        priority: "Normal",
+        deadline: "Hari ini (17.00 WIB)",
+        stage: 2,
+        progress: "40%",
+        desc: "Pelaksanaan operasional kedinasan sesuai tupoksi.",
+        location: "Balai Desa Sumengko",
+        lastUpdated: "Hari ini",
+        hasProof: false,
+        proofNote: "Sedang dikerjakan.",
+        proofImg: "",
+        leaderFeedback: "",
+        history: [{ time: "Pagi tadi", actor: currentUser.nama, note: "Mulai dinas harian.", stage: 2 }]
+      }];
+    }
+    return list;
+  }
+
+  // Render Tab 1: Tugas Saya
+  function renderUserTaskList() {
+    const container = document.getElementById('user-task-list');
+    const tasks = getUserTasks();
+
+    let pending = 0, process = 0, done = 0;
+    tasks.forEach(t => {
+      if (t.stage === 1) pending++;
+      else if (t.stage === 5) done++;
+      else process++;
+    });
+
+    document.getElementById('cnt-pending').innerText = pending;
+    document.getElementById('cnt-process').innerText = process;
+    document.getElementById('cnt-done').innerText = done;
+    document.getElementById('txt-owner-name').innerText = currentUser.nama;
+
+    if (!container) return;
+    container.innerHTML = tasks.map(t => {
+      const isUrgent = t.priority === 'Tinggi';
+      const colorBar = isUrgent ? 'bg-red-500' : 'bg-gov-700';
+      const isSekdes = t.creator && t.creator.includes('Herman');
+      const percent = t.stage * 20;
+
+      return `
+        <div class="user-task-card bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs relative overflow-hidden transition hover:border-gov-600" data-cat="${t.category}">
+          <div class="absolute top-0 left-0 w-1 h-full ${colorBar}"></div>
+          <div class="pl-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1 flex-wrap">
+                <span class="text-[8px] ${isUrgent ? 'bg-red-100 text-red-700 font-bold' : 'bg-slate-100 text-slate-700'} px-1.5 py-0.2 rounded">${t.priority}</span>
+                <span class="text-[8px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">${t.code}</span>
+                ${isSekdes ? '<span class="text-[8px] bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.2 rounded"><i class="fa-solid fa-paper-plane mr-1 text-[7px]"></i>Dari Sekdes Herman</span>' : ''}
+              </div>
+              <span class="text-[8px] font-extrabold ${t.stage === 5 ? 'bg-emerald-100 text-emerald-800' : 'bg-gov-50 text-gov-700 border border-gov-200'} px-2 py-0.5 rounded-full">
+                Tahap ${t.stage}/5 (${t.progress})
+              </span>
+            </div>
+
+            <h4 onclick="bukaUnitDetailModal(${t.id})" class="font-extrabold text-xs text-slate-900 mt-1 leading-snug cursor-pointer hover:text-gov-700">
+              ${t.title}
+            </h4>
+            <div class="mt-0.5 flex items-center justify-between text-[10px] text-slate-500">
+              <span>Pemberi: <strong class="text-slate-700 font-semibold">${t.creator}</strong></span>
+              <span class="text-gov-800 font-bold">Tahap: ${SOP_STEPS[t.stage-1].title.split('&')[0]}</span>
+            </div>
+
+            <div class="w-full bg-slate-100 h-1.5 rounded-full mt-1.5 overflow-hidden">
+              <div class="bg-gov-700 h-1.5 rounded-full transition-all duration-300" style="width: ${percent}%"></div>
+            </div>
+
+            <div class="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span class="text-[9px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${t.deadline}</span>
+              <div class="flex items-center space-x-1.5">
+                <button onclick="bukaUnitDetailModal(${t.id})" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[9px] font-bold px-2 py-0.5 rounded flex items-center space-x-1">
+                  <i class="fa-solid fa-folder-open text-[8px]"></i><span>Unit Detail</span>
+                </button>
+                <button onclick="pindahKeAlur(${t.id})" class="bg-gov-50 hover:bg-gov-100 border border-gov-200 text-gov-700 text-[9px] font-bold px-2 py-0.5 rounded flex items-center space-x-1">
+                  <span>Update Alur</span><i class="fa-solid fa-chevron-right text-[7px]"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function filterTugasUser(cat, btn) {
+    document.querySelectorAll('.filter-tab').forEach(b => b.className = "bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full filter-tab");
+    btn.className = "bg-gov-700 text-white px-2.5 py-0.5 rounded-full filter-tab active";
+    document.querySelectorAll('.user-task-card').forEach(card => {
+      card.classList.toggle('hidden', cat !== 'semua' && card.dataset.cat !== cat);
+    });
+  }
+
+  // Tab 2: Update Alur
+  function pindahKeAlur(taskId) {
+    activeTaskId = parseInt(taskId, 10);
+    switchTab('alur');
+    renderAlurView(activeTaskId);
+  }
+
+  function gantiTugasAlur(taskId) {
+    activeTaskId = parseInt(taskId, 10);
+    renderAlurView(activeTaskId);
+    showToast("Tugas dialihkan ke kode: " + (TASKS.find(t => t.id === activeTaskId)?.code || ""));
+  }
+
+  function renderAlurView(selectedId = null) {
+    const tasks = getUserTasks();
+    const sel = document.getElementById('alur-task-select');
+    if (!sel) return;
+
+    if (tasks.length === 0) {
+      sel.innerHTML = `<option value="">Belum ada tugas</option>`;
+      return;
+    }
+
+    if (!selectedId || !tasks.some(t => t.id === selectedId)) {
+      selectedId = tasks[0].id;
+    }
+    activeTaskId = selectedId;
+
+    sel.innerHTML = tasks.map(t => `
+      <option value="${t.id}" ${t.id === activeTaskId ? 'selected' : ''}>
+        ${t.code} - ${t.title} (${t.progress})
+      </option>
+    `).join('');
+
+    const t = TASKS.find(x => x.id === activeTaskId) || tasks[0];
+    document.getElementById('alur-badge-code').innerText = t.code;
+    document.getElementById('alur-creator').innerText = t.creator;
+    document.getElementById('alur-assignee').innerText = t.assignee;
+    document.getElementById('alur-progress').innerText = `Tahap ${t.stage} (${t.progress})`;
+    document.getElementById('alur-deadline').innerHTML = `<i class="fa-regular fa-clock mr-1"></i>Tenggat: ${t.deadline}`;
+
+    const stepperBox = document.getElementById('alur-stepper-box');
+    stepperBox.innerHTML = SOP_STEPS.map(s => {
+      const isDone = s.step < t.stage;
+      const isCurrent = s.step === t.stage;
+
+      let circleClass = "bg-slate-200 border-slate-300 text-slate-600";
+      let cardBg = "bg-slate-50 border-slate-200";
+      let icon = `<span class="text-[10px] font-bold text-slate-500">${s.step}</span>`;
+      let badge = `<span class="text-[8px] text-slate-400">Belum</span>`;
+
+      if (isDone) {
+        circleClass = "bg-emerald-600 text-white border-emerald-600";
+        cardBg = "bg-emerald-50/40 border-emerald-200";
+        icon = `<i class="fa-solid fa-check text-[9px]"></i>`;
+        badge = `<span class="text-[8px] text-emerald-700 font-bold bg-emerald-100 px-1.5 py-0.2 rounded">Tuntas</span>`;
+      } else if (isCurrent) {
+        circleClass = "bg-gov-700 text-white ring-2 ring-emerald-200 border-gov-700 animate-pulse";
+        cardBg = "bg-emerald-50 border-emerald-400";
+        icon = `<span class="text-[10px] font-extrabold text-white">${s.step}</span>`;
+        badge = `<span class="text-[8px] bg-gov-700 text-white font-bold px-1.5 py-0.2 rounded-full">Aktif (${s.percent})</span>`;
+      }
+
+      return `
+        <div class="relative flex items-start space-x-2 cursor-pointer" onclick="lompatKeTahap(${s.step})" title="Klik untuk beralih ke tahap ini">
+          <span class="absolute -left-5 top-1 w-4 h-4 rounded-full ${circleClass} flex items-center justify-center transition">
+            ${icon}
+          </span>
+          <div class="flex-1 ${cardBg} border p-2 rounded-xl transition hover:border-gov-600">
+            <div class="flex items-center justify-between">
+              <h5 class="font-extrabold text-[11px] ${isCurrent ? 'text-gov-900' : 'text-slate-800'}">${s.step}. ${s.title}</h5>
+              ${badge}
+            </div>
+            <p class="text-[9px] ${isCurrent ? 'text-gov-800 font-medium' : 'text-slate-500'} mt-0.5">${isCurrent ? t.desc : s.desc}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const note = document.getElementById('alur-note');
+    if (note) note.value = t.proofNote || '';
+
+    // Tampilkan pratinjau foto jika sudah ada bukti foto pada tahap ini
+    const photoPreview = document.getElementById('alur-stage-photos-preview');
+    if (photoPreview) {
+      photoPreview.innerHTML = t.proofImg ? `
+        <div class="relative rounded-lg overflow-hidden border border-emerald-300 bg-slate-50">
+          <img src="${t.proofImg}" class="w-full h-24 object-cover" alt="Bukti Terlampir"/>
+          <span class="absolute bottom-1 right-1 bg-emerald-700/90 text-white text-[8px] px-1.5 py-0.5 rounded font-bold">Bukti Tersimpan</span>
+        </div>
+      ` : '';
+    }
+
+    const btnNaik = document.getElementById('btn-naik-tahap');
+    const labelNaik = document.getElementById('btn-naik-label');
+    if (t.stage < 5) {
+      const nextNum = t.stage + 1;
+      labelNaik.innerText = `Tingkatkan ke Tahap ${nextNum}: ${SOP_STEPS[nextNum - 1].title}`;
+      btnNaik.className = "w-full bg-gov-700 hover:bg-gov-800 text-white font-extrabold py-3 rounded-xl shadow flex items-center justify-center space-x-2 transition";
+    } else {
+      labelNaik.innerText = "Tugas Selesai Penuh (100% Pengesahan Pimpinan)";
+      btnNaik.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl shadow flex items-center justify-center space-x-2 transition";
+    }
+  }
+
+  function eksekusiNaikTahap() {
+    const t = TASKS.find(x => x.id === activeTaskId);
+    if (!t) return;
+
+    if (t.stage < 5) {
+      t.stage += 1;
+      t.progress = (t.stage * 20) + '%';
+      t.hasProof = true;
+      t.lastUpdated = "Baru saja (" + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB)";
+
+      const noteVal = document.getElementById('alur-note')?.value;
+      const note = (noteVal && noteVal.trim()) ? noteVal.trim() : `Progres ditingkatkan ke Tahap ${t.stage}: ${SOP_STEPS[t.stage - 1].title}`;
+      t.proofNote = note;
+
+      if (!t.history) t.history = [];
+      t.history.push({
+        time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
+        actor: currentUser.nama + ` (${currentUser.jabatan})`,
+        note: note,
+        stage: t.stage
+      });
+
+      syncSingleTaskToCloud(t);
+      renderAlurView(t.id);
+      renderUserTaskList();
+      renderMonitoringView();
+      showToast(`Sukses! Tahap ${t.stage} (${t.progress}) tersimpan permanen!`);
+    } else {
+      showToast("Tugas sudah selesai 100% dan terverifikasi penuh.");
+    }
+  }
+
+  function lompatKeTahap(stepNum) {
+    const t = TASKS.find(x => x.id === activeTaskId);
+    if (!t) return;
+    t.stage = stepNum;
+    t.progress = (stepNum * 20) + '%';
+    t.hasProof = true;
+    t.lastUpdated = "Baru saja (" + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB)";
+
+    const note = `Pelaksana beralih ke Tahap ${stepNum}: ${SOP_STEPS[stepNum - 1].title}`;
+    if (!t.history) t.history = [];
+    t.history.push({
+      time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
+      actor: currentUser.nama + ` (${currentUser.jabatan})`,
+      note: note,
+      stage: stepNum
+    });
+
+    syncSingleTaskToCloud(t);
+    renderAlurView(t.id);
+    renderUserTaskList();
+    renderMonitoringView();
+    showToast(`Beralih ke Tahap ${stepNum} & tersimpan.`);
+  }
+
+  function simpanCatatanAlur() {
+    const t = TASKS.find(x => x.id === activeTaskId);
+    if (!t) return;
+    const note = document.getElementById('alur-note')?.value;
+    if (note && note.trim()) {
+      t.proofNote = note.trim();
+      t.hasProof = true;
+      t.lastUpdated = "Baru saja";
+      if (!t.history) t.history = [];
+      t.history.push({
+        time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
+        actor: currentUser.nama,
+        note: note.trim(),
+        stage: t.stage
+      });
+      syncSingleTaskToCloud(t);
+      renderAlurView(t.id);
+      renderMonitoringView();
+      showToast("Catatan tersimpan permanen ke riwayat alur.");
+    } else {
+      showToast("Ketikkan catatan terlebih dahulu.");
+    }
+  }
+
+  // Kompresi otomatis gambar dari HP agar aman disimpan di Firestore (< 150 KB)
+  function compressImageToDataURL(file, maxWidth = 800, quality = 0.65) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handleFotoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const t = TASKS.find(x => x.id === activeTaskId);
+    if (!t) return;
+
+    showToast("Mengompresi & menyimpan foto bukti...");
+    try {
+      const compressedDataUrl = await compressImageToDataURL(file);
+      t.proofImg = compressedDataUrl;
+      t.hasProof = true;
+      t.lastUpdated = "Baru saja";
+      if (!t.proofNote) t.proofNote = `Lampiran foto (${file.name}) oleh ${currentUser.nama}`;
+      if (!t.history) t.history = [];
+      t.history.push({
+        time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
+        actor: currentUser.nama,
+        note: `Mengunggah foto bukti lapangan: ${file.name}`,
+        stage: t.stage
+      });
+      await syncSingleTaskToCloud(t);
+      renderAlurView(t.id);
+      renderMonitoringView();
+      showToast(`Foto "${file.name}" tersimpan permanen!`);
+    } catch (err) {
+      showToast("Gagal memproses gambar. Coba file lain.");
+    }
+  }
+
+  function unggahFotoBukti() {
+    const t = TASKS.find(x => x.id === activeTaskId);
+    if (!t) return;
+    t.proofImg = "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=700&q=80";
+    t.hasProof = true;
+    t.lastUpdated = "Baru saja";
+    if (!t.proofNote) t.proofNote = `Foto bukti dokumen fisik dilampirkan oleh ${currentUser.nama}`;
+    if (!t.history) t.history = [];
+    t.history.push({
+      time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
+      actor: currentUser.nama,
+      note: "Melampirkan bukti fisik / foto GPS lapangan.",
+      stage: t.stage
+    });
+    syncSingleTaskToCloud(t);
+    renderAlurView(t.id);
+    renderMonitoringView();
+    showToast("Bukti foto dinas berhasil disimpan!");
+  }
+
+  // ==============================================================
+  // TAB 4: MONITORING PIMPINAN
+  // ==============================================================
+  function renderMonitoringAparaturOptions() {
+    const sel = document.getElementById('mon-filter-aparatur');
+    if (!sel) return;
+    sel.innerHTML = `<option value="semua">Semua 11 Aparatur Desa (Seluruh Pemdes)</option>` +
+      APARATUR.map(a => `<option value="${a.nama}">${a.nama} (${a.jabatan})</option>`).join('');
+  }
+
+  function setMonStage(stage, btn) {
+    monFilterStage = stage;
+    document.querySelectorAll('.mon-stage-btn').forEach(b => b.className = "mon-stage-btn bg-slate-100 text-slate-700 p-1 rounded-md border border-slate-200 transition text-center");
+    btn.className = "mon-stage-btn bg-gov-700 text-white p-1 rounded-md border transition text-center";
+    renderMonitoringView();
+  }
+
+  function setMonCat(cat, btn) {
+    monFilterCat = cat;
+    document.querySelectorAll('.mon-cat-btn').forEach(b => b.className = "mon-cat-btn bg-slate-100 text-slate-700 px-2 py-0.5 rounded flex-1 text-center");
+    btn.className = "mon-cat-btn bg-gov-700 text-white px-2 py-0.5 rounded flex-1 text-center";
+    renderMonitoringView();
+  }
+
+  function resetMonitoringFilter() {
+    monFilterAparatur = "semua";
+    monFilterStage = "semua";
+    monFilterCat = "semua";
+    const sel = document.getElementById('mon-filter-aparatur');
+    if (sel) sel.value = "semua";
+    setMonStage('semua', document.querySelectorAll('.mon-stage-btn')[0]);
+    setMonCat('semua', document.querySelectorAll('.mon-cat-btn')[0]);
+    renderMonitoringView();
+    showToast("Filter monitoring di-reset.");
+  }
+
+  function applyMonitoringFilter() {
+    const sel = document.getElementById('mon-filter-aparatur');
+    if (sel) monFilterAparatur = sel.value;
+    renderMonitoringView();
+  }
+
+  function renderMonitoringView() {
+    const container = document.getElementById('mon-task-list');
+    if (!container) return;
+
+    let total = TASKS.length;
+    let jalan = 0, bukti = 0, sah = 0;
+    TASKS.forEach(t => {
+      if (t.stage <= 2) jalan++;
+      else if (t.stage <= 4) bukti++;
+      else sah++;
+    });
+
+    document.getElementById('mon-stat-total').innerText = total;
+    document.getElementById('mon-stat-jalan').innerText = jalan;
+    document.getElementById('mon-stat-bukti').innerText = bukti;
+    document.getElementById('mon-stat-sah').innerText = sah;
+
+    let filtered = [...TASKS];
+    if (monFilterAparatur !== 'semua') {
+      filtered = filtered.filter(t => t.assignee.toLowerCase().includes(monFilterAparatur.toLowerCase()));
+    }
+    if (monFilterStage === '20-40') {
+      filtered = filtered.filter(t => t.stage === 1 || t.stage === 2);
+    } else if (monFilterStage === '60-80') {
+      filtered = filtered.filter(t => t.stage === 3 || t.stage === 4);
+    } else if (monFilterStage === '100') {
+      filtered = filtered.filter(t => t.stage === 5);
+    }
+    if (monFilterCat !== 'semua') {
+      filtered = filtered.filter(t => t.category === monFilterCat);
+    }
+
+    document.getElementById('mon-item-count').innerText = filtered.length;
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="bg-white border border-slate-200 rounded-xl p-4 text-center text-slate-400">
+          <p class="text-xs font-semibold">Tidak ada tugas yang sesuai filter.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const isSekdesAdmin = currentUser && currentUser.id === 2;
+
+    container.innerHTML = filtered.map(t => {
+      const percent = t.stage * 20;
+      let badgeColor = "bg-blue-100 text-blue-800";
+      let barColor = "bg-blue-600";
+      if (t.stage >= 3 && t.stage <= 4) {
+        badgeColor = "bg-amber-100 text-amber-800";
+        barColor = "bg-amber-500";
+      } else if (t.stage === 5) {
+        badgeColor = "bg-emerald-100 text-emerald-800";
+        barColor = "bg-emerald-600";
+      }
+
+      return `
+        <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs space-y-1.5 transition hover:border-gov-600">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-1.5">
+              <span class="text-[8px] font-bold bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded">${t.code}</span>
+              <span class="text-[8px] font-bold ${badgeColor} px-2 py-0.5 rounded-full">
+                Tahap ${t.stage}/5 (${t.progress})
+              </span>
+            </div>
+            <span class="text-[8px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${t.lastUpdated || 'Hari ini'}</span>
+          </div>
+
+          <div>
+            <h4 class="font-extrabold text-xs text-slate-900 leading-snug cursor-pointer hover:text-gov-700" onclick="bukaUnitDetailModal(${t.id})">
+              ${t.title}
+            </h4>
+            <div class="mt-0.5 flex items-center justify-between text-[10px]">
+              <span class="text-slate-600">Pelaksana: <strong class="text-gov-800 font-bold">${t.assignee}</strong></span>
+              <span class="text-[9px] text-slate-400">Oleh: ${t.creator.split('(')[0]}</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100 space-y-1">
+            <div class="flex items-center justify-between text-[9px]">
+              <span class="text-slate-600 font-semibold flex items-center truncate max-w-[210px]">
+                <i class="fa-solid fa-diagram-project text-gov-700 mr-1 text-[8px]"></i>
+                Alur: <strong class="ml-1 text-slate-800 truncate">${SOP_STEPS[t.stage - 1].title}</strong>
+              </span>
+              <span class="font-bold text-gov-800 shrink-0">${percent}%</span>
+            </div>
+            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+              <div class="${barColor} h-1.5 rounded-full transition-all duration-300" style="width: ${percent}%"></div>
+            </div>
+          </div>
+
+          ${t.hasProof ? `
+            <div class="flex items-center justify-between text-[9px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
+              <span class="truncate max-w-[230px]"><i class="fa-solid fa-paperclip mr-1"></i>"${t.proofNote || 'Bukti diunggah'}"</span>
+              <span class="font-bold shrink-0">Ada Bukti</span>
+            </div>
+          ` : ''}
+
+          <div class="pt-1 flex items-center justify-between border-t border-slate-100 text-xs">
+            <span class="text-[9px] text-slate-400">Prioritas: <strong class="text-slate-600">${t.priority}</strong></span>
+            <div class="flex items-center space-x-1">
+              ${isSekdesAdmin ? `
+                <button type="button" onclick="bukaModalHapus(${t.id})" class="btn-del-task bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-[9px] px-2 py-1 rounded-lg flex items-center space-x-1 shadow-xs transition">
+                  <i class="fa-solid fa-trash-can text-[8px]"></i><span>Hapus</span>
+                </button>
+              ` : ''}
+              <button onclick="bukaUnitDetailModal(${t.id})" class="bg-gov-700 hover:bg-gov-800 text-white font-bold text-[9px] px-2.5 py-1 rounded-lg flex items-center space-x-1 shadow transition">
+                <i class="fa-solid fa-folder-open text-[8px]"></i><span>Buka Detail Unit Tugas</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ==============================================================
+  // UNIT MANDIRI: MODAL DETAIL & RIWAYAT TUGAS BERDIRI SENDIRI
+  // ==============================================================
+  let inspectedTaskId = null;
+
+  function bukaUnitDetailModal(taskId) {
+    inspectedTaskId = parseInt(taskId, 10);
+    const t = TASKS.find(x => x.id === inspectedTaskId);
+    if (!t) return;
+
+    document.getElementById('unit-detail-title').innerText = `${t.code} - ${t.priority}`;
+    const body = document.getElementById('unit-detail-body');
+    const footer = document.getElementById('unit-detail-footer');
+    const percent = t.stage * 20;
+
+    const isOwner = t.assignee.toLowerCase().includes(currentUser.nama.toLowerCase());
+    const isLeader = currentUser.isLeader;
+    const isSekdesAdmin = currentUser && currentUser.id === 2;
+
+    body.innerHTML = `
+      <div class="bg-gov-50 border border-gov-200 rounded-xl p-2.5 space-y-1">
+        <div class="flex items-center justify-between">
+          <span class="text-[8px] bg-gov-700 text-white font-bold px-1.5 py-0.2 rounded">${t.category.toUpperCase()}</span>
+          <span class="text-[9px] font-bold text-gov-800">Tenggat: ${t.deadline}</span>
+        </div>
+        <h4 class="font-bold text-xs text-slate-900">${t.title}</h4>
+        <p class="text-[10px] text-slate-600">${t.desc}</p>
+        <div class="pt-1 border-t border-gov-200/60 flex items-center justify-between text-[10px] text-slate-700">
+          <span>Inisiator: <strong>${t.creator}</strong></span>
+          <span>Pelaksana: <strong class="text-gov-800">${t.assignee}</strong></span>
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="font-extrabold text-[11px] text-slate-800">Progres Alur Kinerja:</span>
+          <span class="text-[10px] font-extrabold text-gov-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+            Tahap ${t.stage}/5 (${t.progress})
+          </span>
+        </div>
+        <p class="text-[10px] font-semibold text-slate-700">
+          <i class="fa-solid fa-circle-notch text-gov-700 mr-1"></i>${SOP_STEPS[t.stage - 1].title}
+        </p>
+        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+          <div class="bg-gov-700 h-2 rounded-full transition-all duration-300" style="width: ${percent}%"></div>
+        </div>
+        <div class="flex justify-between text-[8px] text-slate-400 font-bold px-0.5">
+          <span>20% (Disposisi)</span><span>40% (Telaah)</span><span>60% (Eksekusi)</span><span>80% (Bukti)</span><span>100% (Pengesahan)</span>
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs space-y-1.5">
+        <h5 class="font-bold text-[11px] text-slate-800 flex items-center"><i class="fa-solid fa-camera text-gov-700 mr-1"></i>Bukti Fisik & Catatan:</h5>
+        ${t.hasProof ? `
+          <div class="space-y-1">
+            <p class="text-[10px] text-slate-700 bg-slate-50 p-1.5 rounded border border-slate-200">
+              <strong class="text-gov-800">Catatan:</strong> "${t.proofNote || 'Tidak ada catatan khusus.'}"
+            </p>
+            ${t.proofImg ? `
+              <div class="relative rounded-lg overflow-hidden border border-slate-200">
+                <img src="${t.proofImg}" class="w-full h-28 object-cover" alt="Bukti"/>
+                <div class="absolute bottom-1 left-1 bg-black/60 text-white text-[8px] px-1 py-0.2 rounded font-mono">
+                  <i class="fa-solid fa-location-dot text-emerald-400 mr-1"></i>${t.location}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        ` : `
+          <div class="bg-amber-50 border border-amber-200 rounded p-1.5 text-[10px] text-amber-800 flex items-center space-x-1.5">
+            <i class="fa-solid fa-circle-info text-amber-600"></i><span>Belum ada berkas/foto bukti pelaksanaan yang dilampirkan.</span>
+          </div>
+        `}
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs space-y-1">
+        <h5 class="font-bold text-[11px] text-slate-800 flex items-center justify-between">
+          <span><i class="fa-solid fa-comment-dots text-gov-700 mr-1"></i>Catatan & Feedback Atasan:</span>
+          ${isLeader ? '<span class="text-[8px] text-emerald-700 font-bold bg-emerald-50 px-1 py-0.2 rounded">Pimpinan Aktif</span>' : ''}
+        </h5>
+        ${t.leaderFeedback ? `
+          <div class="bg-emerald-50 border border-emerald-200 p-1.5 rounded text-[10px] text-gov-900">
+            <i class="fa-solid fa-quote-left text-gov-700 mr-1 text-[8px]"></i>${t.leaderFeedback}
+          </div>
+        ` : `<p class="text-[9px] text-slate-400 italic">Belum ada arahan khusus dari atasan.</p>`}
+        
+        ${isLeader ? `
+          <div class="mt-1 space-y-1">
+            <input type="text" id="input-modal-fb" placeholder="Ketik disposisi / feedback pimpinan..." class="w-full border border-slate-300 rounded p-1 text-[11px] focus:ring-1 focus:ring-gov-700"/>
+            <button onclick="kirimFeedbackDisposisi(${t.id})" class="bg-gov-700 text-white font-bold text-[9px] px-2 py-0.5 rounded hover:bg-gov-800 transition">Kirim Feedback Disposisi</button>
+          </div>
+        ` : ''}
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs space-y-1.5">
+        <h5 class="font-bold text-[11px] text-slate-800 flex items-center"><i class="fa-solid fa-timeline text-gov-700 mr-1"></i>Log Riwayat Perubahan:</h5>
+        <div class="space-y-1.5 pl-2.5 border-l-2 border-slate-200 text-[10px]">
+          ${t.history && t.history.length > 0 ? t.history.map(h => `
+            <div class="relative">
+              <span class="absolute -left-[15px] top-1 w-1.5 h-1.5 rounded-full bg-gov-700"></span>
+              <div class="flex items-center justify-between text-[9px] text-slate-400">
+                <span>${h.time}</span><span class="bg-slate-100 text-slate-600 px-1 rounded font-bold">Tahap ${h.stage}</span>
+              </div>
+              <p class="font-bold text-slate-800 text-[10px]">${h.actor}</p>
+              <p class="text-slate-600 text-[9px]">${h.note}</p>
+            </div>
+          `).join('') : '<p class="text-slate-400 text-[9px]">Belum ada riwayat tercatat.</p>'}
+        </div>
+      </div>
+    `;
+
+    footer.innerHTML = `
+      ${isSekdesAdmin ? `
+        <button type="button" onclick="bukaModalHapus(${t.id})" class="btn-detail-del bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 font-bold py-1.5 px-3 rounded-xl text-xs flex items-center justify-center space-x-1 transition">
+          <i class="fa-solid fa-trash-can text-[10px]"></i><span>Hapus Tugas</span>
+        </button>
+      ` : ''}
+      <button onclick="tutupUnitDetailModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-1.5 rounded-xl text-xs">Tutup</button>
+      ${isLeader && t.stage < 5 ? `
+        <button onclick="parafPengesahanPimpinan(${t.id})" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 rounded-xl text-xs shadow flex items-center justify-center space-x-1">
+          <i class="fa-solid fa-signature text-[10px]"></i><span>Sahkan / Validasi 100%</span>
+        </button>
+      ` : (isOwner && t.stage < 5 ? `
+        <button onclick="tutupUnitDetailModal(); pindahKeAlur(${t.id});" class="flex-1 bg-gov-700 hover:bg-gov-800 text-white font-bold py-1.5 rounded-xl text-xs shadow flex items-center justify-center space-x-1">
+          <i class="fa-solid fa-forward-step text-[10px]"></i><span>Update Alur Sekarang</span>
+        </button>
+      ` : '<span class="text-[9px] text-emerald-700 font-bold self-center px-2">Tugas Telah 100% Sah</span>')}
+    `;
+
+    document.getElementById('modal-unit-detail').classList.remove('hidden');
+  }
+
+  function tutupUnitDetailModal() {
+    document.getElementById('modal-unit-detail').classList.add('hidden');
+  }
+
+  function parafPengesahanPimpinan(taskId) {
+    const t = TASKS.find(x => x.id === taskId);
+    if (!t) return;
+    t.stage = 5;
+    t.progress = "100%";
+    t.lastUpdated = "Hari ini (" + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB)";
+    if (!t.history) t.history = [];
+    t.history.push({
+      time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
+      actor: currentUser.nama + ` (${currentUser.jabatan})`,
+      note: "Validasi penuh & paraf pengesahan pimpinan 100% tuntas.",
+      stage: 5
+    });
+
+    syncSingleTaskToCloud(t);
+    renderUserTaskList();
+    renderAlurView(activeTaskId);
+    renderMonitoringView();
+    bukaUnitDetailModal(taskId);
+    showToast(`Pengesahan sukses! Tugas ${t.code} dinyatakan 100% tuntas.`);
+  }
+
+  function kirimFeedbackDisposisi(taskId) {
+    const t = TASKS.find(x => x.id === taskId);
+    const input = document.getElementById('input-modal-fb');
+    if (!t || !input || !input.value.trim()) {
+      showToast("Tuliskan catatan disposisi terlebih dahulu.");
+      return;
+    }
+    const fb = input.value.trim();
+    t.leaderFeedback = fb;
+    t.lastUpdated = "Baru saja";
+    if (!t.history) t.history = [];
+    t.history.push({
+      time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
+      actor: currentUser.nama + ` (${currentUser.jabatan})`,
+      note: `Catatan Atasan: "${fb}"`,
+      stage: t.stage
+    });
+    syncSingleTaskToCloud(t);
+    renderMonitoringView();
+    bukaUnitDetailModal(taskId);
+    showToast("Feedback pimpinan berhasil disimpan!");
+  }
+
+  // Switch Akun Cepat & Simpan Sesi Pengguna ke localStorage
+  function switchAparatur(targetId) {
+    const target = APARATUR.find(a => a.id === targetId);
+    if (!target) return;
+    currentUser = target;
+    localStorage.setItem(LS_USER_KEY, String(currentUser.id));
+
+    const userTasks = getUserTasks();
+    activeTaskId = userTasks.length > 0 ? userTasks[0].id : null;
+
+    updateHeaderUI();
+    renderAparaturModal();
+    renderUserTaskList();
+    renderAlurView(activeTaskId);
+    renderLeaderboard();
+    renderMonitoringView();
+    checkRoleAccess();
+    updateQuickRoleButtons();
+
+    showToast(`Mode Aktif: ${currentUser.nama} (${currentUser.jabatan})`);
+  }
+
+  function updateQuickRoleButtons() {
+    const bSekdes = document.getElementById('btn-role-sekdes');
+    const bNaning = document.getElementById('btn-role-naning');
+    const bKasun = document.getElementById('btn-role-kasun');
+    const bKades = document.getElementById('btn-role-kades');
+
+    const act = "bg-emerald-400 text-gov-900 border-emerald-300 font-extrabold shadow-xs";
+    const inact = "bg-white/10 text-emerald-100 hover:bg-white/20 border-white/20 font-medium";
+
+    if (bSekdes) bSekdes.className = `px-1 py-1 rounded-lg text-[9px] border transition truncate text-center ${currentUser.id === 2 ? act : inact}`;
+    if (bNaning) bNaning.className = `px-1 py-1 rounded-lg text-[9px] border transition truncate text-center ${currentUser.id === 3 ? "bg-amber-400 text-slate-900 border-amber-300 font-extrabold shadow-xs" : inact}`;
+    if (bKasun) bKasun.className = `px-1 py-1 rounded-lg text-[9px] border transition truncate text-center ${currentUser.id === 9 ? act : inact}`;
+    if (bKades) bKades.className = `px-1 py-1 rounded-lg text-[9px] border transition truncate text-center ${currentUser.id === 1 ? act : inact}`;
+  }
+
+  function updateHeaderUI() {
+    document.getElementById('hdr-role-badge').innerText = currentUser.badge;
+    document.getElementById('hdr-jabatan').innerText = currentUser.jabatan;
+    document.getElementById('hdr-nama').innerText = currentUser.nama;
+    document.getElementById('hdr-avatar').innerText = currentUser.nama.charAt(0);
+
+    const capAvatar = document.getElementById('cap-avatar');
+    const capNama = document.getElementById('cap-nama');
+    const skpScore = document.getElementById('skp-score');
+    const skpDurasi = document.getElementById('skp-durasi');
+    const skpRank = document.getElementById('skp-rank');
+
+    if (capAvatar) capAvatar.innerText = currentUser.nama.charAt(0);
+    if (capNama) capNama.innerText = currentUser.nama;
+    if (skpScore) skpScore.innerText = currentUser.score + '%';
+    if (skpDurasi) skpDurasi.innerText = currentUser.durasi;
+
+    const sorted = [...APARATUR].sort((a, b) => b.score - a.score);
+    const rank = sorted.findIndex(a => a.id === currentUser.id) + 1;
+    if (skpRank) skpRank.innerHTML = `#${rank} <span class="text-[9px] font-normal text-emerald-200">/ 11</span>`;
+  }
+
+  function checkRoleAccess() {
+    const leaderView = document.getElementById('mon-leader-container');
+    const lockedView = document.getElementById('mon-locked-container');
+    if (currentUser.isLeader) {
+      if (leaderView) leaderView.classList.remove('hidden');
+      if (lockedView) lockedView.classList.add('hidden');
+    } else {
+      if (leaderView) leaderView.classList.add('hidden');
+      if (lockedView) lockedView.classList.remove('hidden');
+    }
+  }
+
+  function bukaModalGantiAkun() { document.getElementById('modal-ganti-akun').classList.remove('hidden'); }
+  function tutupModalGantiAkun() { document.getElementById('modal-ganti-akun').classList.add('hidden'); }
+
+  // Formulir Buat Tugas
+  function bukaModalBuatTugas() {
+    const modal = document.getElementById('modal-buat-tugas');
+    const sourceSelect = document.getElementById('select-task-source');
+    const banner = document.getElementById('banner-form-non-atasan');
+
+    if (currentUser.hasSubordinates) {
+      banner.classList.add('hidden');
+      sourceSelect.innerHTML = `
+        <option value="kades" selected>Instruksi Langsung Atasan</option>
+        <option value="mandiri">Inisiatif Mandiri Bidang</option>
+        <option value="notulen">Notulen Rapat Musyawarah Desa</option>
+      `;
+    } else {
+      banner.classList.remove('hidden');
+      sourceSelect.innerHTML = `
+        <option value="mandiri" selected>Inisiatif Mandiri Bidang</option>
+        <option value="notulen">Notulen Rapat Musyawarah Desa</option>
+      `;
+    }
+    handleFormSourceChange();
+    modal.classList.remove('hidden');
+  }
+
+  function tutupModalBuatTugas() { document.getElementById('modal-buat-tugas').classList.add('hidden'); }
+
+  function handleFormSourceChange() {
+    const source = document.getElementById('select-task-source').value;
+    const assigneeSelect = document.getElementById('select-task-assignee');
+    const lockedLabel = document.getElementById('label-assignee-locked');
+
+    if (source === 'mandiri') {
+      assigneeSelect.innerHTML = `<option value="${currentUser.nama}">${currentUser.nama} (Diri Sendiri - Pelaksana Mandiri)</option>`;
+      assigneeSelect.disabled = true;
+      lockedLabel.classList.remove('hidden');
+    } else if (source === 'notulen') {
+      assigneeSelect.disabled = false;
+      lockedLabel.classList.add('hidden');
+      assigneeSelect.innerHTML = APARATUR.map(a => `<option value="${a.nama}">${a.nama} (${a.jabatan})</option>`).join('');
+    } else {
+      assigneeSelect.disabled = false;
+      lockedLabel.classList.add('hidden');
+      let allowed = [];
+      if (currentUser.id === 1) allowed = APARATUR.filter(a => a.id !== 1);
+      else if (currentUser.id === 2) allowed = APARATUR.filter(a => a.id > 2);
+      else if (currentUser.id === 3) allowed = APARATUR.filter(a => a.id > 3);
+      else allowed = [currentUser];
+      assigneeSelect.innerHTML = allowed.map(a => `<option value="${a.nama}">${a.nama} (${a.jabatan})</option>`).join('');
+    }
+  }
+
+  function simpanTugasBaru() {
+    const title = document.getElementById('input-task-title').value;
+    if (!title || !title.trim()) {
+      showToast("Judul tugas wajib diisi!");
+      return;
+    }
+
+    const source = document.getElementById('select-task-source').value;
+    const assignee = document.getElementById('select-task-assignee').value;
+    const priority = document.getElementById('select-task-priority').value;
+    const deadline = document.getElementById('input-task-deadline').value || 'Hari ini (17.00 WIB)';
+    const desc = document.getElementById('input-task-desc').value || 'Petunjuk dinas resmi.';
+
+    let creatorName = currentUser.nama + ` (${currentUser.jabatan})`;
+    if (source === 'mandiri') creatorName = `Inisiatif Mandiri (${currentUser.nama})`;
+    else if (source === 'notulen') creatorName = `Notulen Rapat Desa`;
+
+    const newId = Date.now();
+    const newCode = `TGS-2025-${Math.floor(100 + Math.random() * 900)}`;
+
+    const newTask = {
+      id: newId,
+      code: newCode,
+      title: title.trim(),
+      creator: creatorName,
+      assignee: assignee,
+      category: source,
+      priority: priority,
+      deadline: deadline,
+      stage: 1,
+      progress: "20%",
+      desc: desc,
+      location: "Balai Desa Sumengko",
+      lastUpdated: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
+      hasProof: false,
+      proofNote: "",
+      proofImg: "",
+      leaderFeedback: "",
+      history: [
+        {
+          time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
+          actor: creatorName,
+          note: "Tugas didelegasikan ke " + assignee,
+          stage: 1
+        }
+      ]
+    };
+
+    TASKS.unshift(newTask);
+    document.getElementById('input-task-title').value = '';
+    document.getElementById('input-task-desc').value = '';
+    syncSingleTaskToCloud(newTask);
+    tutupModalBuatTugas();
+    renderUserTaskList();
+    renderMonitoringView();
+    showToast(`Tugas baru berhasil disimpan & dikirim ke: ${assignee}!`);
+  }
+
+  // Tab Capaian
+  function renderLeaderboard() {
+    const box = document.getElementById('leaderboard-box');
+    const sorted = [...APARATUR].sort((a, b) => b.score - a.score);
+    box.innerHTML = sorted.map((a, idx) => `
+      <div class="flex items-center justify-between p-2 rounded-xl border ${a.id === currentUser.id ? 'bg-emerald-50 border-emerald-400' : 'bg-slate-50 border-slate-200'} text-xs">
+        <div class="flex items-center space-x-2">
+          <span class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-[9px] ${idx === 0 ? 'bg-amber-400 text-slate-900' : (idx === 1 ? 'bg-slate-300 text-slate-800' : (idx === 2 ? 'bg-amber-600 text-white' : 'bg-slate-200 text-slate-600'))}">
+            ${idx + 1}
+          </span>
+          <div>
+            <p class="font-bold text-[11px] text-slate-800">${a.nama} ${a.id === currentUser.id ? '<span class="text-[8px] bg-gov-700 text-white px-1 py-0.2 rounded font-normal">Anda</span>' : ''}</p>
+            <p class="text-[9px] text-slate-500">${a.jabatan}</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="font-extrabold text-gov-800 text-[11px]">${a.score}%</span>
+          <p class="text-[8px] text-slate-400">Rata-rata: ${a.durasi}</p>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Toast Helper
+  function showToast(msg) {
+    const toast = document.getElementById('toast-notif');
+    const toastMsg = document.getElementById('toast-msg');
+    toastMsg.innerText = msg;
+    toast.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-4');
+    toast.classList.add('opacity-100', 'translate-y-0');
+    setTimeout(() => {
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', 'pointer-events-none', '-translate-y-4');
+    }, 2800);
+  }
+  
+  // ==============================================================
+  // OTENTIKASI PIN LOGIC
+  // ==============================================================
+  let currentPinInput = ''; 
+  let pendingAparaturTarget = null; 
+
+  function pilihAparaturDenganPin(aparaturId) { 
+    const target = APARATUR.find(a => a.id === parseInt(aparaturId, 10)); 
+    if (!target) return; 
+    pendingAparaturTarget = target; 
+    tutupModalGantiAkun(); 
+    bukaModalPin(target); 
+  } 
+
+  function bukaModalPin(targetAparatur) { 
+    currentPinInput = ''; 
+    pendingAparaturTarget = targetAparatur; 
+    document.getElementById('pin-target-avatar').innerText = targetAparatur.nama.charAt(0); 
+    document.getElementById('pin-target-jabatan').innerText = targetAparatur.jabatan; 
+    document.getElementById('pin-target-nama').innerText = targetAparatur.nama; 
+    document.getElementById('pin-hint-text').innerText = targetAparatur.pin; 
+    document.getElementById('pin-error-msg').classList.add('hidden'); 
+    updatePinDots(); 
+    document.getElementById('modal-pin-auth').classList.remove('hidden'); 
+  } 
+
+  function tutupModalPin() { 
+    currentPinInput = ''; 
+    pendingAparaturTarget = null; 
+    document.getElementById('modal-pin-auth').classList.add('hidden'); 
+  } 
+
+  function updatePinDots() { 
+    for (let i = 0; i < 6; i++) { 
+      const dot = document.getElementById('pdot-' + i); 
+      if (!dot) continue; 
+      if (i < currentPinInput.length) { 
+        dot.className = 'w-3 h-3 rounded-full border-2 border-gov-700 bg-gov-700 transition duration-200'; 
+      } else { 
+        dot.className = 'w-3 h-3 rounded-full border-2 border-slate-300 bg-white transition duration-200'; 
+      } 
+    } 
+  } 
+
+  function tekanKeypad(num) { 
+    if (currentPinInput.length >= 6) return; 
+    currentPinInput += num; 
+    updatePinDots(); 
+    document.getElementById('pin-error-msg').classList.add('hidden'); 
+    if (currentPinInput.length === 6) { 
+      setTimeout(verifikasiPinInput, 150); 
+    } 
+  } 
+
+  function hapusDigitPin() { 
+    if (currentPinInput.length > 0) { 
+      currentPinInput = currentPinInput.slice(0, -1); 
+      updatePinDots(); 
+      document.getElementById('pin-error-msg').classList.add('hidden'); 
+    } 
+  } 
+
+  function resetPinInput() { 
+    currentPinInput = ''; 
+    updatePinDots(); 
+    document.getElementById('pin-error-msg').classList.add('hidden'); 
+  } 
+
+  function verifikasiPinInput() { 
+    if (!pendingAparaturTarget) return; 
+    if (currentPinInput === pendingAparaturTarget.pin) { 
+      const selected = pendingAparaturTarget; 
+      tutupModalPin(); 
+      switchAparatur(selected.id); 
+      showToast('Otentikasi Berhasil! Selamat datang, ' + selected.nama); 
+    } else { 
+      document.getElementById('pin-error-msg').classList.remove('hidden'); 
+      for (let i = 0; i < 6; i++) { 
+        const dot = document.getElementById('pdot-' + i); 
+        if (dot) dot.className = 'w-3 h-3 rounded-full border-2 border-red-500 bg-red-100 transition duration-200'; 
+      } 
+      setTimeout(() => { 
+        currentPinInput = ''; 
+        updatePinDots(); 
+      }, 700); 
+    } 
+  } 
+
+  function kunciAkunSekarang() { 
+    bukaModalPin(currentUser); 
+    showToast('Sesi dikunci. Masukkan PIN 6 digit untuk melanjutkan.'); 
+  } 
+
+  function renderAparaturModal() { 
+    const box = document.getElementById('modal-aparatur-list'); 
+    if (!box) return; 
+    box.innerHTML = APARATUR.map(a => `
+      <div onclick="pilihAparaturDenganPin(${a.id});" class="flex items-center justify-between p-2 rounded-xl border ${a.id === currentUser.id ? 'bg-emerald-50 border-emerald-500 ring-1 ring-emerald-500' : 'bg-white border-slate-200'} hover:bg-slate-50 cursor-pointer transition">
+        <div class="flex items-center space-x-2">
+          <div class="w-6 h-6 rounded-full bg-gov-700 text-white font-bold text-xs flex items-center justify-center">${a.nama.charAt(0)}</div>
+          <div>
+            <p class="font-bold text-xs text-slate-800">${a.nama}</p>
+            <p class="text-[9px] text-slate-500">${a.jabatan} • <span class="text-gov-700 font-semibold">${a.role}</span></p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-1">
+          ${a.id === currentUser.id ? '<span class="text-[8px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">Aktif</span>' : '<span class="text-[8px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full font-semibold flex items-center"><i class="fa-solid fa-lock text-[7px] mr-1 text-slate-400"></i>PIN</span>'}
+        </div>
+      </div>
+    `).join(''); 
+  } 
+
+  // ==============================================================
+  // LOGIKA FITUR HAPUS TUGAS OLEH ADMIN SEKDES
+  // ==============================================================
+  let pendingDeleteTaskId = null; 
+  
+  function bukaModalHapus(taskId) { 
+    const t = TASKS.find(x => x.id === parseInt(taskId, 10)); 
+    if (!t) return; 
+    pendingDeleteTaskId = t.id; 
+    document.getElementById('del-task-code').innerText = t.code; 
+    document.getElementById('del-task-title').innerText = t.title; 
+    document.getElementById('modal-konfirmasi-hapus').classList.remove('hidden'); 
+  } 
+  
+  function tutupModalHapus() { 
+    pendingDeleteTaskId = null; 
+    document.getElementById('modal-konfirmasi-hapus').classList.add('hidden'); 
+  } 
+  
+  function konfirmasiHapusSekdes() { 
+    if (!pendingDeleteTaskId) return; 
+    deleteTask(pendingDeleteTaskId); 
+    tutupModalHapus(); 
+  } 
+  
+  function deleteTask(taskId) { 
+    const idNum = parseInt(taskId, 10); 
+    const targetIdx = TASKS.findIndex(x => x.id === idNum); 
+    if (targetIdx === -1) return; 
+    
+    TASKS.splice(targetIdx, 1); 
+    deleteSingleTaskFromCloud(idNum);
+    
+    if (typeof inspectedTaskId !== 'undefined' && inspectedTaskId === idNum) { 
+      tutupUnitDetailModal(); 
+    } 
+    
+    const remainingUserTasks = getUserTasks(); 
+    if (activeTaskId === idNum) { 
+      activeTaskId = remainingUserTasks.length > 0 ? remainingUserTasks[0].id : null; 
+    } 
+    
+    renderUserTaskList(); 
+    renderAlurView(activeTaskId); 
+    renderMonitoringView(); 
+    if (typeof renderLeaderboard === 'function') renderLeaderboard(); 
+    showToast('Tugas berhasil dihapus permanen oleh Admin Sekdes.'); 
+  } 
+
+  // ==============================================================
+  // SERVICE WORKER & INSTALASI PWA (ANDROID & IOS)
+  // ==============================================================
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then((reg) => console.log('DesaTask SW aktif:', reg.scope))
+        .catch((err) => console.error('DesaTask SW gagal:', err));
+    });
+  }
+
+  let deferredInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+  });
+
+  function setupPWAInstallButton() {
+    const installBtn = document.querySelector('button[onclick*="Aplikasi siap diinstal"]');
+    if (installBtn) {
+      installBtn.removeAttribute('onclick');
+      installBtn.addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const { outcome } = await deferredInstallPrompt.userChoice;
+          if (outcome === 'accepted') {
+            showToast('DesaTask sedang dipasang ke layar utama HP...');
+          }
+          deferredInstallPrompt = null;
+        } else {
+          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+          if (isIOS) {
+            showToast('Pengguna iPhone/iPad: Ketuk ikon Share (kotak panah atas) di Safari lalu pilih "Add to Home Screen".');
+          } else {
+            showToast('Ketuk menu titik tiga (⋮) di pojok kanan atas browser lalu pilih "Instal aplikasi".');
+          }
+        }
+      });
+    }
+  }
+</script>
+
+</body>
+</html>
