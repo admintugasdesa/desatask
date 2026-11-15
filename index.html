@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>DesaTask - Kinerja & Akuntabilitas Pemdes Sumengko, Kwadungan, Ngawi</title>
+  <title>DesaTask - Transparansi Kinerja Pemdes Sumengko, Kwadungan, Ngawi</title>
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#0f5132">
   <meta name="mobile-web-app-capable" content="yes">
@@ -37,7 +37,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans antialiased select-none pb-20">
+<body class="bg-slate-100 text-slate-800 font-sans antialiased select-none">
 
   <!-- TOAST NOTIFIKASI -->
   <div id="toast-notif" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none -translate-y-4 max-w-[92vw]">
@@ -45,291 +45,438 @@
     <span id="toast-msg" class="truncate">Notifikasi</span>
   </div>
 
-  <!-- HEADER UTAMA -->
-  <header class="bg-gradient-to-br from-gov-800 via-gov-700 to-emerald-800 text-white sticky top-0 z-30 shadow-md">
-    <div class="max-w-md mx-auto px-3.5 pt-3 pb-2.5 space-y-2.5">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center shadow-inner">
-            <i class="fa-solid fa-landmark text-emerald-300 text-sm"></i>
-          </div>
-          <div>
-            <div class="flex items-center space-x-1.5">
-              <h1 class="font-extrabold text-sm tracking-tight leading-none">DesaTask</h1>
-              <span class="text-[8px] bg-emerald-400/20 text-emerald-200 border border-emerald-300/30 px-1.5 py-0.2 rounded-full font-bold">SUMENGKO</span>
+  <!-- ===================================================================== -->
+  <!-- HALAMAN MUKA PUBLIK (PORTAL TRANSPARANSI KINERJA UNTUK MASYARAKAT)   -->
+  <!-- ===================================================================== -->
+  <div id="public-portal-view" class="min-h-screen pb-10">
+    <!-- HERO HEADER PUBLIK -->
+    <div class="bg-gradient-to-br from-gov-900 via-gov-800 to-emerald-700 text-white relative overflow-hidden shadow-lg">
+      <!-- Dekorasi Latar Halus -->
+      <div class="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-emerald-400/10 blur-xl pointer-events-none"></div>
+      <div class="absolute -left-10 bottom-0 w-36 h-36 rounded-full bg-amber-400/10 blur-lg pointer-events-none"></div>
+
+      <div class="max-w-lg mx-auto px-4 pt-4 pb-6 relative z-10 space-y-4">
+        <!-- BARIS ATAS: IDENTITAS & TOMBOL LOGIN APARATUR -->
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center space-x-2.5 min-w-0">
+            <div class="w-9 h-9 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center shadow-inner shrink-0">
+              <i class="fa-solid fa-landmark text-amber-300 text-base"></i>
             </div>
-            <p class="text-[9px] text-emerald-100/80 mt-0.5">Kec. Kwadungan, Kab. Ngawi</p>
-          </div>
-        </div>
-
-        <div class="flex items-center space-x-1.5">
-          <button type="button" onclick="showToast('Aplikasi siap diinstal ke layar utama HP')" title="Instal Aplikasi" class="bg-white/15 hover:bg-white/25 border border-white/20 text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center space-x-1 transition">
-            <i class="fa-solid fa-download text-[9px] text-emerald-300"></i>
-            <span>Instal</span>
-          </button>
-          <button type="button" onclick="kunciAkunSekarang()" title="Kunci Sesi" class="bg-white/15 hover:bg-white/25 border border-white/20 text-white w-7 h-7 rounded-lg flex items-center justify-center transition">
-            <i class="fa-solid fa-lock text-[10px] text-amber-300"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- KARTU PROFIL APARATUR AKTIF -->
-      <div onclick="bukaModalGantiAkun()" class="bg-white/10 hover:bg-white/15 border border-white/20 rounded-xl p-2 flex items-center justify-between cursor-pointer transition">
-        <div class="flex items-center space-x-2.5 min-w-0">
-          <div id="hdr-avatar" class="w-9 h-9 rounded-full bg-emerald-400 text-gov-900 font-extrabold text-sm flex items-center justify-center shrink-0 shadow">N</div>
-          <div class="min-w-0">
-            <div class="flex items-center space-x-1.5">
-              <span id="hdr-role-badge" class="text-[8px] bg-amber-400 text-slate-900 font-extrabold px-1.5 py-0.2 rounded">Kaur Keu</span>
-              <span id="hdr-jabatan" class="text-[10px] text-emerald-100 font-semibold truncate">Kaur Keuangan</span>
+            <div class="min-w-0">
+              <div class="flex items-center space-x-1.5">
+                <span class="font-extrabold text-sm tracking-tight leading-none">DesaTask</span>
+                <span class="inline-flex items-center space-x-1 text-[8px] bg-emerald-400/20 text-emerald-200 border border-emerald-300/30 px-1.5 py-0.5 rounded-full font-bold">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-ping"></span>
+                  <span>LIVE</span>
+                </span>
+              </div>
+              <p class="text-[10px] text-emerald-100/80 truncate mt-0.5">Portal Transparansi Publik</p>
             </div>
-            <p id="hdr-nama" class="font-extrabold text-xs text-white truncate mt-0.5">Naning Lestari</p>
+          </div>
+
+          <div class="flex items-center space-x-1.5 shrink-0">
+            <button type="button" id="btn-public-install" title="Pasang Aplikasi" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white w-8 h-8 rounded-xl flex items-center justify-center transition">
+              <i class="fa-solid fa-download text-xs text-emerald-200"></i>
+            </button>
+            <button type="button" onclick="bukaModalGantiAkun()" class="bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 font-extrabold text-[11px] px-3 py-2 rounded-xl shadow-md flex items-center space-x-1.5 transition">
+              <i class="fa-solid fa-right-to-bracket text-xs"></i>
+              <span>Login Aparatur</span>
+            </button>
           </div>
         </div>
-        <div class="bg-white/15 px-2 py-1 rounded-lg text-[9px] font-bold flex items-center space-x-1 shrink-0">
-          <span>Ganti</span>
-          <i class="fa-solid fa-repeat text-[8px]"></i>
-        </div>
-      </div>
 
-      <!-- AKSES CEPAT ROLE -->
-      <div class="grid grid-cols-4 gap-1">
-        <button id="btn-role-kades" onclick="pilihAparaturDenganPin(1)" class="px-1 py-1 rounded-lg text-[9px] border transition truncate text-center">Kades</button>
-        <button id="btn-role-sekdes" onclick="pilihAparaturDenganPin(2)" class="px-1 py-1 rounded-lg text-[9px] border transition truncate text-center">Sekdes</button>
-        <button id="btn-role-naning" onclick="pilihAparaturDenganPin(3)" class="px-1 py-1 rounded-lg text-[9px] border transition truncate text-center">Kaur Keu</button>
-        <button id="btn-role-kasun" onclick="pilihAparaturDenganPin(9)" class="px-1 py-1 rounded-lg text-[9px] border transition truncate text-center">Kadus A</button>
+        <!-- JUDUL DESA & KETERANGAN -->
+        <div class="pt-1">
+          <span class="inline-block text-[9px] font-bold uppercase tracking-wider bg-white/10 text-emerald-200 px-2.5 py-0.5 rounded-full border border-white/15">
+            Akuntabilitas Kinerja Pemerintahan
+          </span>
+          <h1 class="text-lg sm:text-xl font-extrabold tracking-tight mt-1.5 leading-snug">
+            Pemerintah Desa Sumengko
+          </h1>
+          <p class="text-xs text-emerald-100/90 mt-0.5">
+            Kecamatan Kwadungan, Kabupaten Ngawi • Rapor Capaian Sasaran Kinerja Pegawai (SKP)
+          </p>
+        </div>
+
+        <!-- KARTU RINGKASAN STATISTIK DESA -->
+        <div class="bg-white/10 backdrop-blur-xs border border-white/20 rounded-2xl p-3.5 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-[10px] text-emerald-200 font-semibold uppercase tracking-wider">Rata-Rata Indeks SKP Desa</p>
+              <div class="flex items-baseline space-x-2 mt-0.5">
+                <span id="pub-avg-skp" class="text-2xl font-extrabold text-amber-300">0%</span>
+                <span id="pub-predikat-desa" class="text-[10px] font-bold bg-emerald-400/20 text-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300/30">Menunggu Data</span>
+              </div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-amber-400/20 border border-amber-300/30 flex items-center justify-center text-amber-300 text-lg">
+              <i class="fa-solid fa-chart-line"></i>
+            </div>
+          </div>
+
+          <div class="w-full bg-black/25 h-2 rounded-full overflow-hidden">
+            <div id="pub-avg-bar" class="bg-gradient-to-r from-amber-400 to-emerald-300 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 pt-2 border-t border-white/15 text-center">
+            <div>
+              <p id="pub-total-tasks" class="font-extrabold text-sm text-white">0</p>
+              <p class="text-[9px] text-emerald-100/80">Agenda Tugas</p>
+            </div>
+            <div class="border-x border-white/15">
+              <p id="pub-done-tasks" class="font-extrabold text-sm text-emerald-300">0</p>
+              <p class="text-[9px] text-emerald-100/80">Tuntas 100%</p>
+            </div>
+            <div>
+              <p id="pub-ontime-rate" class="font-extrabold text-sm text-amber-300">0%</p>
+              <p class="text-[9px] text-emerald-100/80">Tepat Waktu</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </header>
 
-  <!-- KONTEN UTAMA -->
-  <main class="max-w-md mx-auto px-3.5 pt-3 space-y-3">
+    <!-- KONTEN UTAMA PORTAL PUBLIK -->
+    <div class="max-w-lg mx-auto px-4 -mt-3 space-y-4 relative z-20">
+      <!-- PODIUM 3 BESAR PERANGKAT DESA -->
+      <div class="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="font-extrabold text-xs text-slate-800 flex items-center">
+            <i class="fa-solid fa-medal text-amber-500 mr-1.5 text-sm"></i>3 Perangkat Desa Kinerja Tertinggi
+          </h2>
+          <span id="pub-last-sync" class="text-[9px] text-slate-400 font-medium">Terhubung Cloud</span>
+        </div>
 
-    <!-- ==================== TAB 1: TUGAS SAYA ==================== -->
-    <section id="view-tugas" class="space-y-3">
-      <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs">
-        <div class="flex items-center justify-between mb-2">
+        <div id="pub-podium-box" class="grid grid-cols-3 gap-2 items-end pt-2"></div>
+      </div>
+
+      <!-- DAFTAR LENGKAP CAPAIAN SKP 11 PERANGKAT DESA -->
+      <div class="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
           <div>
-            <p class="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">Ringkasan Kinerja</p>
-            <h2 id="txt-owner-name" class="font-extrabold text-xs text-slate-800">Naning Lestari</h2>
+            <h2 class="font-extrabold text-xs text-slate-800 flex items-center">
+              <i class="fa-solid fa-users-viewfinder text-gov-700 mr-1.5 text-sm"></i>Capaian SKP Seluruh Perangkat
+            </h2>
+            <p class="text-[10px] text-slate-500 mt-0.5">11 Aparatur Pemerintah Desa Sumengko</p>
           </div>
-          <button onclick="bukaModalBuatTugas()" class="bg-gov-700 hover:bg-gov-800 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-xs flex items-center space-x-1 transition">
-            <i class="fa-solid fa-plus text-[9px]"></i>
-            <span>Tugas Baru</span>
-          </button>
+          <span class="text-[9px] font-bold bg-emerald-50 text-gov-800 border border-emerald-200 px-2 py-0.5 rounded-full">
+            Urut Peringkat
+          </span>
         </div>
 
-        <div class="grid grid-cols-3 gap-1.5 text-center">
-          <div class="bg-amber-50 border border-amber-200 rounded-lg p-1.5">
-            <p id="cnt-pending" class="font-extrabold text-sm text-amber-700">0</p>
-            <p class="text-[9px] text-amber-800 font-semibold">Disposisi Baru</p>
-          </div>
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-1.5">
-            <p id="cnt-process" class="font-extrabold text-sm text-blue-700">0</p>
-            <p class="text-[9px] text-blue-800 font-semibold">Berjalan</p>
-          </div>
-          <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-1.5">
-            <p id="cnt-done" class="font-extrabold text-sm text-emerald-700">0</p>
-            <p class="text-[9px] text-emerald-800 font-semibold">Tuntas 100%</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- FILTER KATEGORI TUGAS -->
-      <div class="flex items-center space-x-1.5 overflow-x-auto pb-0.5 text-[10px] font-bold">
-        <button onclick="filterTugasUser('semua', this)" class="bg-gov-700 text-white px-2.5 py-0.5 rounded-full filter-tab active">Semua</button>
-        <button onclick="filterTugasUser('kades', this)" class="bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full filter-tab">Instruksi Pimpinan</button>
-        <button onclick="filterTugasUser('mandiri', this)" class="bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full filter-tab">Mandiri</button>
-        <button onclick="filterTugasUser('notulen', this)" class="bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full filter-tab">Notulen Musdes</button>
-      </div>
-
-      <!-- DAFTAR KARTU TUGAS -->
-      <div id="user-task-list" class="space-y-2"></div>
-    </section>
-
-    <!-- ==================== TAB 2: UPDATE ALUR ==================== -->
-    <section id="view-alur" class="hidden space-y-3">
-      <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs space-y-2">
-        <label class="block text-[10px] font-bold text-slate-600">Pilih Tugas yang Dikerjakan:</label>
-        <select id="alur-task-select" onchange="gantiTugasAlur(this.value)" class="w-full text-xs font-bold border-slate-300 rounded-lg focus:ring-gov-700 focus:border-gov-700"></select>
-
-        <div class="bg-gov-50 border border-gov-200 rounded-lg p-2 space-y-1 text-[10px]">
-          <div class="flex items-center justify-between">
-            <span id="alur-badge-code" class="bg-gov-700 text-white font-extrabold px-1.5 py-0.2 rounded text-[9px]">-</span>
-            <span id="alur-deadline" class="text-gov-800 font-bold"><i class="fa-regular fa-clock mr-1"></i>Tenggat: -</span>
-          </div>
-          <div class="flex items-center justify-between text-slate-600 pt-0.5">
-            <span>Dari: <strong id="alur-creator" class="text-slate-800">-</strong></span>
-            <span>Progres: <strong id="alur-progress" class="text-gov-800">-</strong></span>
-          </div>
-          <div class="text-slate-600">Pelaksana: <strong id="alur-assignee" class="text-gov-800">-</strong></div>
-        </div>
-      </div>
-
-      <!-- 5 TAHAP SOP -->
-      <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-xs">
-        <h3 class="font-extrabold text-xs text-slate-800 mb-2.5 flex items-center">
-          <i class="fa-solid fa-list-check text-gov-700 mr-1.5"></i>5 Tahapan SOP Kinerja Desa
-        </h3>
-        <div id="alur-stepper-box" class="relative pl-5 border-l-2 border-slate-200 space-y-2.5"></div>
-      </div>
-
-      <!-- FORM BUKTI & CATATAN -->
-      <div id="alur-form-container" class="bg-white border border-slate-200 rounded-xl p-3 shadow-xs space-y-2.5">
-        <h3 class="font-extrabold text-xs text-slate-800 flex items-center">
-          <i class="fa-solid fa-camera text-gov-700 mr-1.5"></i>Laporan Progres & Bukti Lapangan
-        </h3>
-
-        <textarea id="alur-note" rows="2" placeholder="Tuliskan catatan hasil pelaksanaan atau kendala lapangan..." class="w-full text-xs border-slate-300 rounded-lg focus:ring-gov-700 focus:border-gov-700"></textarea>
-
-        <div id="alur-stage-photos-preview"></div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <label id="label-foto-upload" class="bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-[10px] py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 cursor-pointer transition">
-            <i class="fa-solid fa-camera text-gov-700"></i>
-            <span>Ambil / Pilih Foto</span>
-            <input id="alur-foto-input" type="file" accept="image/*" onchange="handleFotoUpload(event)" class="hidden">
-          </label>
-          <button id="btn-simpan-catatan" type="button" onclick="simpanCatatanAlur()" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-gov-800 font-bold text-[10px] py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition">
-            <i class="fa-solid fa-floppy-disk"></i>
-            <span>Simpan Catatan</span>
-          </button>
+        <!-- PENCARIAN PERANGKAT -->
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="pub-search-input" oninput="renderPublicPortal()" placeholder="Cari nama atau jabatan perangkat desa..." class="w-full pl-8 pr-3 py-2 text-xs bg-slate-50 border-slate-200 rounded-xl focus:bg-white focus:ring-gov-700 focus:border-gov-700">
         </div>
 
-        <button id="btn-naik-tahap" type="button" onclick="eksekusiNaikTahap()" class="w-full bg-gov-700 hover:bg-gov-800 text-white font-extrabold py-3 rounded-xl shadow flex items-center justify-center space-x-2 transition text-xs">
-          <i class="fa-solid fa-arrow-up-right-dots"></i>
-          <span id="btn-naik-label">Tingkatkan Tahap</span>
+        <!-- LIST KARTU SKP -->
+        <div id="pub-skp-list" class="space-y-2.5"></div>
+      </div>
+
+      <!-- FOOTER TRANSPARANSI & AKSES LOGIN BAWAH -->
+      <div class="bg-emerald-950 text-emerald-100 rounded-2xl p-4 text-center space-y-2.5 shadow">
+        <p class="text-[11px] font-semibold text-white">Transparansi Pelayanan & Kinerja Pemdes Sumengko</p>
+        <p class="text-[10px] text-emerald-200/80 leading-relaxed">
+          Data dihitung otomatis berdasarkan penyelesaian tahapan kerja dan ketepatan tenggat waktu masing-masing perangkat desa.
+        </p>
+        <button type="button" onclick="bukaModalGantiAkun()" class="w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs py-2.5 rounded-xl flex items-center justify-center space-x-2 transition">
+          <i class="fa-solid fa-lock text-amber-300 text-[11px]"></i>
+          <span>Masuk ke Ruang Kerja Aparatur Desa</span>
         </button>
       </div>
-    </section>
-
-    <!-- ==================== TAB 3: CAPAIAN SKP ==================== -->
-    <section id="view-capaian" class="hidden space-y-3">
-      <div class="bg-gradient-to-br from-gov-800 to-emerald-800 text-white rounded-xl p-3.5 shadow">
-        <div class="flex items-center space-x-3">
-          <div id="cap-avatar" class="w-11 h-11 rounded-full bg-amber-400 text-slate-900 font-extrabold text-base flex items-center justify-center shadow">N</div>
-          <div>
-            <p class="text-[9px] text-emerald-200 uppercase font-bold">Rapor Kinerja Aparatur</p>
-            <h3 id="cap-nama" class="font-extrabold text-sm">Naning Lestari</h3>
-            <p id="cap-task-summary" class="text-[10px] text-emerald-200/90 mt-0.5">0 Tuntas dari 0 Tugas</p>
-          </div>
-        </div>
-        <div class="grid grid-cols-3 gap-2 mt-3 pt-2.5 border-t border-white/15 text-center">
-          <div>
-            <p id="skp-score" class="font-extrabold text-base text-amber-300">0%</p>
-            <p class="text-[9px] text-emerald-100">Indeks SKP</p>
-          </div>
-          <div>
-            <p id="skp-durasi" class="font-extrabold text-base">-</p>
-            <p class="text-[9px] text-emerald-100">Rata-rata Tuntas</p>
-          </div>
-          <div>
-            <p id="skp-rank" class="font-extrabold text-base text-emerald-300">#1 <span class="text-[9px] font-normal text-emerald-200">/ 11</span></p>
-            <p class="text-[9px] text-emerald-100">Peringkat Desa</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-xs space-y-2">
-        <div class="flex items-center justify-between">
-          <h3 class="font-extrabold text-xs text-slate-800 flex items-center">
-            <i class="fa-solid fa-trophy text-amber-500 mr-1.5"></i>Peringkat Kinerja 11 Aparatur Pemdes
-          </h3>
-          <span class="text-[9px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-bold">Sync Monitoring</span>
-        </div>
-        <div id="leaderboard-box" class="space-y-1.5"></div>
-      </div>
-    </section>
-
-    <!-- ==================== TAB 4: MONITORING PIMPINAN ==================== -->
-    <section id="view-monitoring" class="hidden space-y-3">
-      <!-- TAMPILAN TERKUNCI UNTUK NON-PIMPINAN -->
-      <div id="mon-locked-container" class="hidden bg-white border border-slate-200 rounded-xl p-6 text-center space-y-2 shadow-xs">
-        <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto text-lg">
-          <i class="fa-solid fa-shield-halved"></i>
-        </div>
-        <h3 class="font-extrabold text-sm text-slate-800">Akses Khusus Pimpinan & Otorisator</h3>
-        <p class="text-xs text-slate-500">Menu monitoring menyeluruh hanya dapat diakses oleh Kepala Desa, Sekretaris Desa, dan Kaur Keuangan.</p>
-      </div>
-
-      <!-- TAMPILAN MONITORING PIMPINAN -->
-      <div id="mon-leader-container" class="space-y-3">
-        <div class="grid grid-cols-4 gap-1.5 text-center">
-          <div class="bg-white border border-slate-200 rounded-xl p-2">
-            <p id="mon-stat-total" class="font-extrabold text-sm text-slate-800">0</p>
-            <p class="text-[8px] text-slate-500 font-bold">Total Tugas</p>
-          </div>
-          <div class="bg-blue-50 border border-blue-200 rounded-xl p-2">
-            <p id="mon-stat-jalan" class="font-extrabold text-sm text-blue-700">0</p>
-            <p class="text-[8px] text-blue-800 font-bold">Tahap 1-2</p>
-          </div>
-          <div class="bg-amber-50 border border-amber-200 rounded-xl p-2">
-            <p id="mon-stat-bukti" class="font-extrabold text-sm text-amber-700">0</p>
-            <p class="text-[8px] text-amber-800 font-bold">Tahap 3-4</p>
-          </div>
-          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2">
-            <p id="mon-stat-sah" class="font-extrabold text-sm text-emerald-700">0</p>
-            <p class="text-[8px] text-emerald-800 font-bold">Sah 100%</p>
-          </div>
-        </div>
-
-        <!-- FILTER MONITORING -->
-        <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-extrabold text-slate-700">Filter Monitoring (<span id="mon-item-count">0</span> Tugas)</span>
-            <button onclick="resetMonitoringFilter()" class="text-[9px] text-gov-700 font-bold hover:underline">Reset Filter</button>
-          </div>
-
-          <select id="mon-filter-aparatur" onchange="applyMonitoringFilter()" class="w-full text-[11px] font-semibold border-slate-300 rounded-lg py-1.5"></select>
-
-          <div class="grid grid-cols-4 gap-1 text-[9px] font-bold">
-            <button onclick="setMonStage('semua', this)" class="mon-stage-btn bg-gov-700 text-white p-1 rounded-md border transition text-center">Semua</button>
-            <button onclick="setMonStage('20-40', this)" class="mon-stage-btn bg-slate-100 text-slate-700 p-1 rounded-md border border-slate-200 transition text-center">20-40%</button>
-            <button onclick="setMonStage('60-80', this)" class="mon-stage-btn bg-slate-100 text-slate-700 p-1 rounded-md border border-slate-200 transition text-center">60-80%</button>
-            <button onclick="setMonStage('100', this)" class="mon-stage-btn bg-slate-100 text-slate-700 p-1 rounded-md border border-slate-200 transition text-center">100% Sah</button>
-          </div>
-
-          <div class="flex items-center space-x-1 text-[9px] font-bold">
-            <button onclick="setMonCat('semua', this)" class="mon-cat-btn bg-gov-700 text-white px-2 py-0.5 rounded flex-1 text-center">Semua</button>
-            <button onclick="setMonCat('kades', this)" class="mon-cat-btn bg-slate-100 text-slate-700 px-2 py-0.5 rounded flex-1 text-center">Pimpinan</button>
-            <button onclick="setMonCat('mandiri', this)" class="mon-cat-btn bg-slate-100 text-slate-700 px-2 py-0.5 rounded flex-1 text-center">Mandiri</button>
-            <button onclick="setMonCat('notulen', this)" class="mon-cat-btn bg-slate-100 text-slate-700 px-2 py-0.5 rounded flex-1 text-center">Musdes</button>
-          </div>
-        </div>
-
-        <div id="mon-task-list" class="space-y-2"></div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- NAVIGASI BAWAH -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-30 shadow-lg">
-    <div class="max-w-md mx-auto flex items-center justify-around py-1.5">
-      <button id="nav-tugas" onclick="switchTab('tugas')" class="flex-1 flex flex-col items-center text-gov-700 font-bold transition py-1">
-        <i class="fa-solid fa-clipboard-list text-base"></i>
-        <span class="text-[9px] mt-0.5">Tugas Saya</span>
-      </button>
-      <button id="nav-alur" onclick="switchTab('alur')" class="flex-1 flex flex-col items-center text-slate-400 font-medium hover:text-gov-700 transition py-1">
-        <i class="fa-solid fa-diagram-project text-base"></i>
-        <span class="text-[9px] mt-0.5">Update Alur</span>
-      </button>
-      <button id="nav-capaian" onclick="switchTab('capaian')" class="flex-1 flex flex-col items-center text-slate-400 font-medium hover:text-gov-700 transition py-1">
-        <i class="fa-solid fa-award text-base"></i>
-        <span class="text-[9px] mt-0.5">Capaian SKP</span>
-      </button>
-      <button id="nav-monitoring" onclick="switchTab('monitoring')" class="flex-1 flex flex-col items-center text-slate-400 font-medium hover:text-gov-700 transition py-1">
-        <i class="fa-solid fa-eye text-base"></i>
-        <span class="text-[9px] mt-0.5">Monitoring</span>
-      </button>
     </div>
-  </nav>
+  </div>
 
-  <!-- ==================== MODAL 1: GANTI AKUN APARATUR ==================== -->
+  <!-- ===================================================================== -->
+  <!-- RUANG KERJA INTERNAL APARATUR (MUNCUL SETELAH LOGIN PIN BERHASIL)      -->
+  <!-- ===================================================================== -->
+  <div id="app-internal-wrapper" class="hidden pb-20">
+    <!-- HEADER UTAMA INTERNAL -->
+    <header class="bg-gradient-to-br from-gov-800 via-gov-700 to-emerald-800 text-white sticky top-0 z-30 shadow-md">
+      <div class="max-w-md mx-auto px-3.5 pt-3 pb-2.5 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center shadow-inner">
+              <i class="fa-solid fa-landmark text-emerald-300 text-sm"></i>
+            </div>
+            <div>
+              <div class="flex items-center space-x-1.5">
+                <h1 class="font-extrabold text-sm tracking-tight leading-none">DesaTask</h1>
+                <span class="text-[8px] bg-emerald-400/20 text-emerald-200 border border-emerald-300/30 px-1.5 py-0.2 rounded-full font-bold">SUMENGKO</span>
+              </div>
+              <p class="text-[9px] text-emerald-100/80 mt-0.5">Kec. Kwadungan, Kab. Ngawi</p>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-1.5">
+            <button type="button" onclick="keluarKeHalamanPublik()" title="Kembali ke Halaman Masyarakat" class="bg-white/15 hover:bg-white/25 border border-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center space-x-1 transition">
+              <i class="fa-solid fa-globe text-[9px] text-emerald-300"></i>
+              <span>Publik</span>
+            </button>
+            <button type="button" onclick="kunciAkunSekarang()" title="Kunci Sesi" class="bg-white/15 hover:bg-white/25 border border-white/20 text-white w-7 h-7 rounded-lg flex items-center justify-center transition">
+              <i class="fa-solid fa-lock text-[10px] text-amber-300"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- KARTU PROFIL APARATUR AKTIF -->
+        <div onclick="bukaModalGantiAkun()" class="bg-white/10 hover:bg-white/15 border border-white/20 rounded-xl p-2 flex items-center justify-between cursor-pointer transition">
+          <div class="flex items-center space-x-2.5 min-w-0">
+            <div id="hdr-avatar" class="w-9 h-9 rounded-full bg-emerald-400 text-gov-900 font-extrabold text-sm flex items-center justify-center shrink-0 shadow">N</div>
+            <div class="min-w-0">
+              <div class="flex items-center space-x-1.5">
+                <span id="hdr-role-badge" class="text-[8px] bg-amber-400 text-slate-900 font-extrabold px-1.5 py-0.2 rounded">Kaur Keu</span>
+                <span id="hdr-jabatan" class="text-[10px] text-emerald-100 font-semibold truncate">Kaur Keuangan</span>
+              </div>
+              <p id="hdr-nama" class="font-extrabold text-xs text-white truncate mt-0.5">Naning Lestari</p>
+            </div>
+          </div>
+          <div class="bg-white/15 px-2 py-1 rounded-lg text-[9px] font-bold flex items-center space-x-1 shrink-0">
+            <span>Ganti</span>
+            <i class="fa-solid fa-repeat text-[8px]"></i>
+          </div>
+        </div>
+
+        <!-- AKSES CEPAT ROLE -->
+        <div class="grid grid-cols-4 gap-1">
+          <button id="btn-role-kades" onclick="pilihAparaturDenganPin(1)" class="px-1 py-1 rounded-lg text-[9px] border transition truncate text-center">Kades</button>
+          <button id="btn-role-sekdes" onclick="pilihAparaturDenganPin(2)" class="px-1 py-1 rounded-lg text-[9px] border transition truncate text-center">Sekdes</button>
+          <button id="btn-role-naning" onclick="pilihAparaturDenganPin(3)" class="px-1 py-1 rounded-lg text-[9px] border transition truncate text-center">Kaur Keu</button>
+          <button id="btn-role-kasun" onclick="pilihAparaturDenganPin(9)" class="px-1 py-1 rounded-lg text-[9px] border transition truncate text-center">Kadus A</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- KONTEN UTAMA INTERNAL -->
+    <main class="max-w-md mx-auto px-3.5 pt-3 space-y-3">
+
+      <!-- ==================== TAB 1: TUGAS SAYA ==================== -->
+      <section id="view-tugas" class="space-y-3">
+        <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <p class="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">Ringkasan Kinerja</p>
+              <h2 id="txt-owner-name" class="font-extrabold text-xs text-slate-800">Naning Lestari</h2>
+            </div>
+            <button onclick="bukaModalBuatTugas()" class="bg-gov-700 hover:bg-gov-800 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-xs flex items-center space-x-1 transition">
+              <i class="fa-solid fa-plus text-[9px]"></i>
+              <span>Tugas Baru</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-3 gap-1.5 text-center">
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-1.5">
+              <p id="cnt-pending" class="font-extrabold text-sm text-amber-700">0</p>
+              <p class="text-[9px] text-amber-800 font-semibold">Disposisi Baru</p>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-1.5">
+              <p id="cnt-process" class="font-extrabold text-sm text-blue-700">0</p>
+              <p class="text-[9px] text-blue-800 font-semibold">Berjalan</p>
+            </div>
+            <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-1.5">
+              <p id="cnt-done" class="font-extrabold text-sm text-emerald-700">0</p>
+              <p class="text-[9px] text-emerald-800 font-semibold">Tuntas 100%</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- FILTER KATEGORI TUGAS -->
+        <div class="flex items-center space-x-1.5 overflow-x-auto pb-0.5 text-[10px] font-bold">
+          <button onclick="filterTugasUser('semua', this)" class="bg-gov-700 text-white px-2.5 py-0.5 rounded-full filter-tab active">Semua</button>
+          <button onclick="filterTugasUser('kades', this)" class="bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full filter-tab">Instruksi Pimpinan</button>
+          <button onclick="filterTugasUser('mandiri', this)" class="bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full filter-tab">Mandiri</button>
+          <button onclick="filterTugasUser('notulen', this)" class="bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full filter-tab">Notulen Musdes</button>
+        </div>
+
+        <!-- DAFTAR KARTU TUGAS -->
+        <div id="user-task-list" class="space-y-2"></div>
+      </section>
+
+      <!-- ==================== TAB 2: UPDATE ALUR ==================== -->
+      <section id="view-alur" class="hidden space-y-3">
+        <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs space-y-2">
+          <label class="block text-[10px] font-bold text-slate-600">Pilih Tugas yang Dikerjakan:</label>
+          <select id="alur-task-select" onchange="gantiTugasAlur(this.value)" class="w-full text-xs font-bold border-slate-300 rounded-lg focus:ring-gov-700 focus:border-gov-700"></select>
+
+          <div class="bg-gov-50 border border-gov-200 rounded-lg p-2 space-y-1 text-[10px]">
+            <div class="flex items-center justify-between">
+              <span id="alur-badge-code" class="bg-gov-700 text-white font-extrabold px-1.5 py-0.2 rounded text-[9px]">-</span>
+              <span id="alur-deadline" class="text-gov-800 font-bold"><i class="fa-regular fa-clock mr-1"></i>Tenggat: -</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-600 pt-0.5">
+              <span>Dari: <strong id="alur-creator" class="text-slate-800">-</strong></span>
+              <span>Progres: <strong id="alur-progress" class="text-gov-800">-</strong></span>
+            </div>
+            <div class="text-slate-600">Pelaksana: <strong id="alur-assignee" class="text-gov-800">-</strong></div>
+          </div>
+        </div>
+
+        <!-- 5 TAHAP SOP -->
+        <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-xs">
+          <h3 class="font-extrabold text-xs text-slate-800 mb-2.5 flex items-center">
+            <i class="fa-solid fa-list-check text-gov-700 mr-1.5"></i>5 Tahapan SOP Kinerja Desa
+          </h3>
+          <div id="alur-stepper-box" class="relative pl-5 border-l-2 border-slate-200 space-y-2.5"></div>
+        </div>
+
+        <!-- FORM BUKTI & CATATAN -->
+        <div id="alur-form-container" class="bg-white border border-slate-200 rounded-xl p-3 shadow-xs space-y-2.5">
+          <h3 class="font-extrabold text-xs text-slate-800 flex items-center">
+            <i class="fa-solid fa-camera text-gov-700 mr-1.5"></i>Laporan Progres & Bukti Lapangan
+          </h3>
+
+          <textarea id="alur-note" rows="2" placeholder="Tuliskan catatan hasil pelaksanaan atau kendala lapangan..." class="w-full text-xs border-slate-300 rounded-lg focus:ring-gov-700 focus:border-gov-700"></textarea>
+
+          <div id="alur-stage-photos-preview"></div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <label id="label-foto-upload" class="bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-[10px] py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 cursor-pointer transition">
+              <i class="fa-solid fa-camera text-gov-700"></i>
+              <span>Ambil / Pilih Foto</span>
+              <input id="alur-foto-input" type="file" accept="image/*" onchange="handleFotoUpload(event)" class="hidden">
+            </label>
+            <button id="btn-simpan-catatan" type="button" onclick="simpanCatatanAlur()" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-gov-800 font-bold text-[10px] py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>Simpan Catatan</span>
+            </button>
+          </div>
+
+          <button id="btn-naik-tahap" type="button" onclick="eksekusiNaikTahap()" class="w-full bg-gov-700 hover:bg-gov-800 text-white font-extrabold py-3 rounded-xl shadow flex items-center justify-center space-x-2 transition text-xs">
+            <i class="fa-solid fa-arrow-up-right-dots"></i>
+            <span id="btn-naik-label">Tingkatkan Tahap</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 3: CAPAIAN SKP ==================== -->
+      <section id="view-capaian" class="hidden space-y-3">
+        <div class="bg-gradient-to-br from-gov-800 to-emerald-800 text-white rounded-xl p-3.5 shadow">
+          <div class="flex items-center space-x-3">
+            <div id="cap-avatar" class="w-11 h-11 rounded-full bg-amber-400 text-slate-900 font-extrabold text-base flex items-center justify-center shadow">N</div>
+            <div>
+              <p class="text-[9px] text-emerald-200 uppercase font-bold">Rapor Kinerja Aparatur</p>
+              <h3 id="cap-nama" class="font-extrabold text-sm">Naning Lestari</h3>
+              <p id="cap-task-summary" class="text-[10px] text-emerald-200/90 mt-0.5">0 Tuntas dari 0 Tugas</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-3 pt-2.5 border-t border-white/15 text-center">
+            <div>
+              <p id="skp-score" class="font-extrabold text-base text-amber-300">0%</p>
+              <p class="text-[9px] text-emerald-100">Indeks SKP</p>
+            </div>
+            <div>
+              <p id="skp-durasi" class="font-extrabold text-base">-</p>
+              <p class="text-[9px] text-emerald-100">Rata-rata Tuntas</p>
+            </div>
+            <div>
+              <p id="skp-rank" class="font-extrabold text-base text-emerald-300">#1 <span class="text-[9px] font-normal text-emerald-200">/ 11</span></p>
+              <p class="text-[9px] text-emerald-100">Peringkat Desa</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-xs space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="font-extrabold text-xs text-slate-800 flex items-center">
+              <i class="fa-solid fa-trophy text-amber-500 mr-1.5"></i>Peringkat Kinerja 11 Aparatur Pemdes
+            </h3>
+            <span class="text-[9px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-bold">Sync Monitoring</span>
+          </div>
+          <div id="leaderboard-box" class="space-y-1.5"></div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 4: MONITORING PIMPINAN ==================== -->
+      <section id="view-monitoring" class="hidden space-y-3">
+        <!-- TAMPILAN TERKUNCI UNTUK NON-PIMPINAN -->
+        <div id="mon-locked-container" class="hidden bg-white border border-slate-200 rounded-xl p-6 text-center space-y-2 shadow-xs">
+          <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto text-lg">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <h3 class="font-extrabold text-sm text-slate-800">Akses Khusus Pimpinan & Otorisator</h3>
+          <p class="text-xs text-slate-500">Menu monitoring menyeluruh hanya dapat diakses oleh Kepala Desa, Sekretaris Desa, dan Kaur Keuangan.</p>
+        </div>
+
+        <!-- TAMPILAN MONITORING PIMPINAN -->
+        <div id="mon-leader-container" class="space-y-3">
+          <div class="grid grid-cols-4 gap-1.5 text-center">
+            <div class="bg-white border border-slate-200 rounded-xl p-2">
+              <p id="mon-stat-total" class="font-extrabold text-sm text-slate-800">0</p>
+              <p class="text-[8px] text-slate-500 font-bold">Total Tugas</p>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-2">
+              <p id="mon-stat-jalan" class="font-extrabold text-sm text-blue-700">0</p>
+              <p class="text-[8px] text-blue-800 font-bold">Tahap 1-2</p>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-2">
+              <p id="mon-stat-bukti" class="font-extrabold text-sm text-amber-700">0</p>
+              <p class="text-[8px] text-amber-800 font-bold">Tahap 3-4</p>
+            </div>
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2">
+              <p id="mon-stat-sah" class="font-extrabold text-sm text-emerald-700">0</p>
+              <p class="text-[8px] text-emerald-800 font-bold">Sah 100%</p>
+            </div>
+          </div>
+
+          <!-- FILTER MONITORING -->
+          <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-extrabold text-slate-700">Filter Monitoring (<span id="mon-item-count">0</span> Tugas)</span>
+              <button onclick="resetMonitoringFilter()" class="text-[9px] text-gov-700 font-bold hover:underline">Reset Filter</button>
+            </div>
+
+            <select id="mon-filter-aparatur" onchange="applyMonitoringFilter()" class="w-full text-[11px] font-semibold border-slate-300 rounded-lg py-1.5"></select>
+
+            <div class="grid grid-cols-4 gap-1 text-[9px] font-bold">
+              <button onclick="setMonStage('semua', this)" class="mon-stage-btn bg-gov-700 text-white p-1 rounded-md border transition text-center">Semua</button>
+              <button onclick="setMonStage('20-40', this)" class="mon-stage-btn bg-slate-100 text-slate-700 p-1 rounded-md border border-slate-200 transition text-center">20-40%</button>
+              <button onclick="setMonStage('60-80', this)" class="mon-stage-btn bg-slate-100 text-slate-700 p-1 rounded-md border border-slate-200 transition text-center">60-80%</button>
+              <button onclick="setMonStage('100', this)" class="mon-stage-btn bg-slate-100 text-slate-700 p-1 rounded-md border border-slate-200 transition text-center">100% Sah</button>
+            </div>
+
+            <div class="flex items-center space-x-1 text-[9px] font-bold">
+              <button onclick="setMonCat('semua', this)" class="mon-cat-btn bg-gov-700 text-white px-2 py-0.5 rounded flex-1 text-center">Semua</button>
+              <button onclick="setMonCat('kades', this)" class="mon-cat-btn bg-slate-100 text-slate-700 px-2 py-0.5 rounded flex-1 text-center">Pimpinan</button>
+              <button onclick="setMonCat('mandiri', this)" class="mon-cat-btn bg-slate-100 text-slate-700 px-2 py-0.5 rounded flex-1 text-center">Mandiri</button>
+              <button onclick="setMonCat('notulen', this)" class="mon-cat-btn bg-slate-100 text-slate-700 px-2 py-0.5 rounded flex-1 text-center">Musdes</button>
+            </div>
+          </div>
+
+          <div id="mon-task-list" class="space-y-2"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- NAVIGASI BAWAH -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-30 shadow-lg">
+      <div class="max-w-md mx-auto flex items-center justify-around py-1.5">
+        <button id="nav-tugas" onclick="switchTab('tugas')" class="flex-1 flex flex-col items-center text-gov-700 font-bold transition py-1">
+          <i class="fa-solid fa-clipboard-list text-base"></i>
+          <span class="text-[9px] mt-0.5">Tugas Saya</span>
+        </button>
+        <button id="nav-alur" onclick="switchTab('alur')" class="flex-1 flex flex-col items-center text-slate-400 font-medium hover:text-gov-700 transition py-1">
+          <i class="fa-solid fa-diagram-project text-base"></i>
+          <span class="text-[9px] mt-0.5">Update Alur</span>
+        </button>
+        <button id="nav-capaian" onclick="switchTab('capaian')" class="flex-1 flex flex-col items-center text-slate-400 font-medium hover:text-gov-700 transition py-1">
+          <i class="fa-solid fa-award text-base"></i>
+          <span class="text-[9px] mt-0.5">Capaian SKP</span>
+        </button>
+        <button id="nav-monitoring" onclick="switchTab('monitoring')" class="flex-1 flex flex-col items-center text-slate-400 font-medium hover:text-gov-700 transition py-1">
+          <i class="fa-solid fa-eye text-base"></i>
+          <span class="text-[9px] mt-0.5">Monitoring</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ==================== MODAL 1: PILIH AKUN / LOGIN APARATUR ==================== -->
   <div id="modal-ganti-akun" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 flex items-end sm:items-center justify-center p-3">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden max-h-[85vh] flex flex-col">
       <div class="p-3 bg-gov-700 text-white flex items-center justify-between">
         <div>
-          <h3 class="font-extrabold text-xs">Pilih Akun Aparatur Desa</h3>
+          <h3 class="font-extrabold text-xs">Login / Pilih Akun Aparatur Desa</h3>
           <p class="text-[9px] text-emerald-200">Pemdes Sumengko, Kwadungan, Ngawi</p>
         </div>
         <button onclick="tutupModalGantiAkun()" class="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center text-xs"><i class="fa-solid fa-xmark"></i></button>
@@ -345,7 +492,7 @@
       <div>
         <span id="pin-target-jabatan" class="text-[9px] bg-emerald-100 text-gov-800 font-bold px-2 py-0.5 rounded-full">Jabatan</span>
         <h4 id="pin-target-nama" class="font-extrabold text-xs text-slate-900 mt-1">Nama Aparatur</h4>
-        <p class="text-[9px] text-slate-400 mt-0.5">PIN Standar: <strong id="pin-hint-text" class="text-slate-600">000000</strong></p>
+        <p class="text-[9px] text-slate-400 mt-0.5">Masukkan 6 digit PIN keamanan aparatur</p>
       </div>
 
       <div class="flex items-center justify-center space-x-2.5 py-1">
@@ -409,8 +556,7 @@
           <input type="text" id="input-task-title" placeholder="Contoh: Penyusunan SPJ Kegiatan Fisik..." class="w-full text-xs border-slate-300 rounded-lg">
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
-          <div>
+        <div>
           <label class="block text-[10px] font-bold text-slate-700 mb-1">Prioritas</label>
           <select id="select-task-priority" class="w-full text-xs border-slate-300 rounded-lg">
             <option value="Tinggi">Tinggi (Mendesak)</option>
@@ -477,17 +623,17 @@
 
   // 1. DATA MASTER 11 APARATUR PEMDES SUMENGKO
   const APARATUR = [
-    { id: 1, nama: "Drs. H. SUMARLI, M.Ag", jabatan: "Kepala Desa", role: "Pimpinan Tertinggi", badge: "Kades", score: 98.5, durasi: "1.1 Hari", pin: "112233", hasSubordinates: true, isLeader: true },
-    { id: 2, nama: "Herman Dwi Novianto, ST", jabatan: "Sekretaris Desa", role: "Koordinator Tim", badge: "Sekdes", score: 96.8, durasi: "1.2 Hari", pin: "223344", hasSubordinates: true, isLeader: true },
-    { id: 3, nama: "Naning Lestari", jabatan: "Kaur Keuangan", role: "Otorisator Keuangan", badge: "Kaur Keu", score: 94.2, durasi: "1.4 Hari", pin: "334455", hasSubordinates: true, isLeader: true },
-    { id: 4, nama: "Galuh Rismawati, SE", jabatan: "Kaur Umum", role: "Staf Tata Usaha", badge: "Kaur Umum", score: 92.4, durasi: "1.5 Hari", pin: "445566", hasSubordinates: false, isLeader: false },
-    { id: 5, nama: "Ramli Nur Aziza", jabatan: "Kaur Perencanaan", role: "Staf Perencanaan", badge: "Kaur Ren", score: 91.0, durasi: "1.6 Hari", pin: "556677", hasSubordinates: false, isLeader: false },
-    { id: 6, nama: "Lugas Khalid Maulana", jabatan: "Kasi Pemerintahan", role: "Pelaksana Teknis", badge: "Kasi Pem", score: 89.5, durasi: "1.8 Hari", pin: "667788", hasSubordinates: false, isLeader: false },
-    { id: 7, nama: "Puspita Sari Handayani, SE", jabatan: "Kasi Kesejahteraan", role: "Pelaksana Teknis", badge: "Kasi Kesra", score: 88.7, durasi: "1.7 Hari", pin: "778899", hasSubordinates: false, isLeader: false },
-    { id: 8, nama: "Shoim Syah", jabatan: "Kasi Pelayanan", role: "Pelaksana Teknis", badge: "Kasi Yan", score: 93.1, durasi: "1.3 Hari", pin: "889900", hasSubordinates: false, isLeader: false },
-    { id: 9, nama: "Bowo Witono", jabatan: "Kasun Blok A", role: "Kewilayahan", badge: "Kadus A", score: 90.2, durasi: "1.5 Hari", pin: "123456", hasSubordinates: false, isLeader: false },
-    { id: 10, nama: "Agus Setiawan, Spd", jabatan: "Kasun Blok B", role: "Kewilayahan", badge: "Kadus B", score: 89.1, durasi: "1.9 Hari", pin: "234567", hasSubordinates: false, isLeader: false },
-    { id: 11, nama: "Ugeng Budi Prasetyo", jabatan: "Kasun Blok C", role: "Kewilayahan", badge: "Kadus C", score: 87.8, durasi: "2.0 Hari", pin: "345678", hasSubordinates: false, isLeader: false }
+    { id: 1, nama: "Drs. H. SUMARLI, M.Ag", jabatan: "Kepala Desa", role: "Pimpinan Tertinggi", badge: "Kades", pin: "112233", hasSubordinates: true, isLeader: true },
+    { id: 2, nama: "Herman Dwi Novianto, ST", jabatan: "Sekretaris Desa", role: "Koordinator Tim", badge: "Sekdes", pin: "223344", hasSubordinates: true, isLeader: true },
+    { id: 3, nama: "Naning Lestari", jabatan: "Kaur Keuangan", role: "Otorisator Keuangan", badge: "Kaur Keu", pin: "334455", hasSubordinates: true, isLeader: true },
+    { id: 4, nama: "Galuh Rismawati, SE", jabatan: "Kaur Umum", role: "Staf Tata Usaha", badge: "Kaur Umum", pin: "445566", hasSubordinates: false, isLeader: false },
+    { id: 5, nama: "Ramli Nur Aziza", jabatan: "Kaur Perencanaan", role: "Staf Perencanaan", badge: "Kaur Ren", pin: "556677", hasSubordinates: false, isLeader: false },
+    { id: 6, nama: "Lugas Khalid Maulana", jabatan: "Kasi Pemerintahan", role: "Pelaksana Teknis", badge: "Kasi Pem", pin: "667788", hasSubordinates: false, isLeader: false },
+    { id: 7, nama: "Puspita Sari Handayani, SE", jabatan: "Kasi Kesejahteraan", role: "Pelaksana Teknis", badge: "Kasi Kesra", pin: "778899", hasSubordinates: false, isLeader: false },
+    { id: 8, nama: "Shoim Syah", jabatan: "Kasi Pelayanan", role: "Pelaksana Teknis", badge: "Kasi Yan", pin: "889900", hasSubordinates: false, isLeader: false },
+    { id: 9, nama: "Bowo Witono", jabatan: "Kasun Blok A", role: "Kewilayahan", badge: "Kadus A", pin: "123456", hasSubordinates: false, isLeader: false },
+    { id: 10, nama: "Agus Setiawan, Spd", jabatan: "Kasun Blok B", role: "Kewilayahan", badge: "Kadus B", pin: "234567", hasSubordinates: false, isLeader: false },
+    { id: 11, nama: "Ugeng Budi Prasetyo", jabatan: "Kasun Blok C", role: "Kewilayahan", badge: "Kadus C", pin: "345678", hasSubordinates: false, isLeader: false }
   ];
 
   // 2. 5 TAHAPAN STANDAR SOP KINERJA DESA
@@ -499,7 +645,6 @@
     { step: 5, title: "Pengesahan Pimpinan", percent: "100%", desc: "Validasi penuh tanda tangan digital Kepala Desa / Sekdes." }
   ];
 
-  // 3. DATA BAWAAN AWAL KOSONG
   const DEFAULT_TASKS = [];
 
   // ==============================================================
@@ -542,6 +687,7 @@
   async function syncSingleTaskToCloud(task) {
     lastLocalMutationTime = Date.now();
     saveTasksToLocal();
+    renderPublicPortal();
     if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
 
     try {
@@ -554,9 +700,7 @@
       if (result.status === 'ok' && Array.isArray(result.tasks)) {
         TASKS = result.tasks.map(normalizeTask);
         saveTasksToLocal();
-        renderUserTaskList();
-        renderAlurView(activeTaskId);
-        renderMonitoringView();
+        refreshAllViews();
       }
     } catch (err) {
       console.warn("Offline / gagal kirim ke Google Drive:", err);
@@ -567,6 +711,7 @@
   async function deleteSingleTaskFromCloud(taskId) {
     lastLocalMutationTime = Date.now();
     saveTasksToLocal();
+    renderPublicPortal();
     if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
 
     try {
@@ -579,9 +724,7 @@
       if (result.status === 'ok' && Array.isArray(result.tasks)) {
         TASKS = result.tasks.map(normalizeTask);
         saveTasksToLocal();
-        renderUserTaskList();
-        renderAlurView(activeTaskId);
-        renderMonitoringView();
+        refreshAllViews();
       }
     } catch (err) {
       console.warn("Gagal menghapus di Google Drive:", err);
@@ -592,7 +735,6 @@
     if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.startsWith("TEMPEL_")) return;
 
     const fetchFromDrive = async () => {
-      // Hindari menimpa data lokal jika baru saja melakukan perubahan (< 8 detik)
       if (Date.now() - lastLocalMutationTime < 8000) return;
 
       try {
@@ -603,14 +745,19 @@
           TASKS = cloudTasks.map(normalizeTask);
           saveTasksToLocal();
 
-          const userTasks = getUserTasks();
-          if (!activeTaskId || !userTasks.some(t => Number(t.id) === Number(activeTaskId))) {
-            activeTaskId = userTasks.length > 0 ? Number(userTasks[0].id) : null;
+          const syncLabel = document.getElementById('pub-last-sync');
+          if (syncLabel) {
+            syncLabel.innerText = "Update: " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB";
           }
 
-          renderUserTaskList();
-          renderAlurView(activeTaskId);
-          renderMonitoringView();
+          if (currentUser) {
+            const userTasks = getUserTasks();
+            if (!activeTaskId || !userTasks.some(t => Number(t.id) === Number(activeTaskId))) {
+              activeTaskId = userTasks.length > 0 ? Number(userTasks[0].id) : null;
+            }
+          }
+
+          refreshAllViews();
           if (inspectedTaskId && !document.getElementById('modal-unit-detail').classList.contains('hidden')) {
             bukaUnitDetailModal(inspectedTaskId);
           }
@@ -624,34 +771,344 @@
     setInterval(fetchFromDrive, 15000);
   }
 
-  // Muat State Pengguna & Tugas dari LocalStorage
+  // Muat State Pengguna (Default null = Mode Publik Masyarakat)
   let TASKS = loadTasksFromLocal();
   const savedUserId = parseInt(localStorage.getItem(LS_USER_KEY), 10);
-  let currentUser = APARATUR.find(a => a.id === savedUserId) || APARATUR[2];
+  let currentUser = APARATUR.find(a => a.id === savedUserId) || null;
   let activeTaskId = null;
   let monFilterAparatur = "semua";
   let monFilterStage = "semua";
   let monFilterCat = "semua";
 
+  function refreshAllViews() {
+    renderPublicPortal();
+    if (currentUser) {
+      renderUserTaskList();
+      renderAlurView(activeTaskId);
+      renderCapaianSKP();
+      renderMonitoringView();
+    }
+  }
+
+  function applyAppMode() {
+    const publicView = document.getElementById('public-portal-view');
+    const internalView = document.getElementById('app-internal-wrapper');
+
+    if (currentUser) {
+      publicView.classList.add('hidden');
+      internalView.classList.remove('hidden');
+
+      const userTasks = getUserTasks();
+      if (!activeTaskId || !userTasks.some(t => Number(t.id) === Number(activeTaskId))) {
+        activeTaskId = userTasks.length > 0 ? Number(userTasks[0].id) : null;
+      }
+
+      updateHeaderUI();
+      renderAparaturModal();
+      renderMonitoringAparaturOptions();
+      renderUserTaskList();
+      renderAlurView(activeTaskId);
+      renderCapaianSKP();
+      renderMonitoringView();
+      checkRoleAccess();
+      updateQuickRoleButtons();
+    } else {
+      internalView.classList.add('hidden');
+      publicView.classList.remove('hidden');
+      renderAparaturModal();
+      renderPublicPortal();
+    }
+  }
+
+  function keluarKeHalamanPublik() {
+    currentUser = null;
+    activeTaskId = null;
+    localStorage.removeItem(LS_USER_KEY);
+    applyAppMode();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showToast("Beralih ke Halaman Transparansi Masyarakat.");
+  }
+
   // Inisialisasi
   window.addEventListener('DOMContentLoaded', () => {
-    const initialUserTasks = getUserTasks();
-    activeTaskId = initialUserTasks.length > 0 ? Number(initialUserTasks[0].id) : null;
-
-    updateHeaderUI();
-    renderAparaturModal();
-    renderMonitoringAparaturOptions();
-    renderUserTaskList();
-    renderAlurView(activeTaskId);
-    renderLeaderboard();
-    renderMonitoringView();
-    checkRoleAccess();
-    updateQuickRoleButtons();
+    applyAppMode();
     initDriveSync();
     setupPWAInstallButton();
   });
 
-  // Switch Tab
+  // ==============================================================
+  // PERHITUNGAN SKP REALISTIS & HALAMAN MUKA PUBLIK
+  // ==============================================================
+  function parseDeadlineInput(val) {
+    if (!val) {
+      const fallback = new Date();
+      fallback.setHours(16, 0, 0, 0);
+      return { text: formatTanggalJam(fallback), ms: fallback.getTime() };
+    }
+    const [datePart, timePart] = val.split('T');
+    const [y, m, d] = datePart.split('-').map(Number);
+    const [hh, mm] = (timePart || '15:00').split(':').map(Number);
+    const dt = new Date(y, m - 1, d, hh, mm, 0, 0);
+    return { text: formatTanggalJam(dt), ms: dt.getTime() };
+  }
+
+  function formatTanggalJam(dt) {
+    const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const jam = String(dt.getHours()).padStart(2, '0');
+    const menit = String(dt.getMinutes()).padStart(2, '0');
+    return `${namaHari[dt.getDay()]}, ${dt.getDate()} ${namaBulan[dt.getMonth()]} ${dt.getFullYear()}, ${jam}.${menit} WIB`;
+  }
+
+  function getDeadlineMs(t) {
+    if (t.deadlineAt && !isNaN(Number(t.deadlineAt))) return Number(t.deadlineAt);
+    if (!t.deadline) return null;
+
+    const bulanMap = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, Mei: 4, Jun: 5, Jul: 6, Agu: 7, Sep: 8, Okt: 9, Nov: 10, Des: 11 };
+    const match = t.deadline.match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})(?:,\s*(\d{2})\.(\d{2}))?/);
+    if (match) {
+      const tgl = parseInt(match[1], 10);
+      const bln = bulanMap[match[2]] ?? 0;
+      const thn = parseInt(match[3], 10);
+      const jam = match[4] ? parseInt(match[4], 10) : 16;
+      const mnt = match[5] ? parseInt(match[5], 10) : 0;
+      return new Date(thn, bln, tgl, jam, mnt, 0, 0).getTime();
+    }
+    return null;
+  }
+
+  function formatDurasiRealistis(totalMs) {
+    const totalMenit = Math.max(1, Math.round(totalMs / (1000 * 60)));
+    if (totalMenit < 60) return `${totalMenit} Menit`;
+    const totalJam = totalMs / (1000 * 60 * 60);
+    if (totalJam < 24) {
+      const jamDisplay = totalJam % 1 === 0 ? totalJam : totalJam.toFixed(1);
+      return `${jamDisplay} Jam`;
+    }
+    const totalHari = totalJam / 24;
+    return `${totalHari.toFixed(1)} Hari`;
+  }
+
+  function hitungStatistikSKP() {
+    const now = Date.now();
+
+    const hasil = APARATUR.map(a => {
+      const nameLower = a.nama.toLowerCase();
+      const myTasks = TASKS.filter(t => {
+        const assigneeLower = (t.assignee || '').toLowerCase();
+        return assigneeLower.includes(nameLower) || nameLower.includes(assigneeLower);
+      });
+
+      const totalCount = myTasks.length;
+      const doneTasks = myTasks.filter(t => Number(t.stage) === 5);
+      const doneCount = doneTasks.length;
+      let onTimeCount = 0;
+
+      let score = 0;
+      if (totalCount > 0) {
+        const totalPoin = myTasks.reduce((acc, t) => {
+          const st = Math.min(5, Math.max(1, Number(t.stage) || 1));
+          let poinTugas = st * 20;
+          const deadlineMs = getDeadlineMs(t);
+
+          if (deadlineMs) {
+            if (st === 5) {
+              const selesaiMs = Number(t.completedAt) || now;
+              if (selesaiMs <= deadlineMs) {
+                onTimeCount++;
+              } else {
+                const jamTerlambat = (selesaiMs - deadlineMs) / (1000 * 60 * 60);
+                const penalti = Math.min(20, Math.ceil(jamTerlambat / 4) * 2.5);
+                poinTugas = Math.max(80, poinTugas - penalti);
+              }
+            } else if (now > deadlineMs) {
+              const jamLewat = (now - deadlineMs) / (1000 * 60 * 60);
+              const penaltiOverdue = Math.min(15, Math.ceil(jamLewat / 6) * 2.5);
+              poinTugas = Math.max(0, poinTugas - penaltiOverdue);
+            }
+          } else if (st === 5) {
+            onTimeCount++;
+          }
+
+          return acc + poinTugas;
+        }, 0);
+
+        score = Number((totalPoin / totalCount).toFixed(1));
+      }
+
+      let durasi = "-";
+      if (doneCount > 0) {
+        let totalDurasiMs = 0;
+        doneTasks.forEach(t => {
+          if (!t.completedAt) t.completedAt = now;
+          const createdMs = Number(t.id);
+          const selesaiMs = Number(t.completedAt);
+          if (createdMs > 1700000000000 && selesaiMs >= createdMs) {
+            totalDurasiMs += (selesaiMs - createdMs);
+          } else {
+            totalDurasiMs += (60 * 60 * 1000);
+          }
+        });
+        durasi = formatDurasiRealistis(totalDurasiMs / doneCount);
+      }
+
+      return { ...a, totalCount, doneCount, onTimeCount, score, durasi };
+    });
+
+    hasil.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      if (b.onTimeCount !== a.onTimeCount) return b.onTimeCount - a.onTimeCount;
+      if (b.doneCount !== a.doneCount) return b.doneCount - a.doneCount;
+      return a.id - b.id;
+    });
+
+    return hasil;
+  }
+
+  function getPredikatSKP(score, totalCount) {
+    if (totalCount === 0) return { label: "Belum Ada Tugas", badge: "bg-slate-100 text-slate-500 border-slate-200", bar: "bg-slate-300", text: "text-slate-500" };
+    if (score >= 90) return { label: "Sangat Baik", badge: "bg-emerald-50 text-emerald-700 border-emerald-200", bar: "bg-gradient-to-r from-gov-700 to-emerald-500", text: "text-emerald-700" };
+    if (score >= 75) return { label: "Baik", badge: "bg-blue-50 text-blue-700 border-blue-200", bar: "bg-blue-600", text: "text-blue-700" };
+    if (score >= 50) return { label: "Proses Berjalan", badge: "bg-amber-50 text-amber-700 border-amber-200", bar: "bg-amber-500", text: "text-amber-700" };
+    return { label: "Tahap Awal", badge: "bg-slate-100 text-slate-700 border-slate-200", bar: "bg-slate-500", text: "text-slate-700" };
+  }
+
+  function renderPublicPortal() {
+    const sorted = hitungStatistikSKP();
+    const aktifAparatur = sorted.filter(a => a.totalCount > 0);
+
+    // Statistik Agregat Desa
+    const totalTasks = TASKS.length;
+    const doneTasks = TASKS.filter(t => Number(t.stage) === 5).length;
+    const totalOnTime = sorted.reduce((acc, a) => acc + a.onTimeCount, 0);
+
+    const avgSkp = aktifAparatur.length > 0
+      ? Number((aktifAparatur.reduce((acc, a) => acc + a.score, 0) / aktifAparatur.length).toFixed(1))
+      : 0;
+    const onTimeRate = doneTasks > 0 ? Math.round((totalOnTime / doneTasks) * 100) : (totalTasks > 0 ? 100 : 0);
+
+    const avgEl = document.getElementById('pub-avg-skp');
+    const avgBar = document.getElementById('pub-avg-bar');
+    const predEl = document.getElementById('pub-predikat-desa');
+    const totEl = document.getElementById('pub-total-tasks');
+    const doneEl = document.getElementById('pub-done-tasks');
+    const ontimeEl = document.getElementById('pub-ontime-rate');
+
+    if (avgEl) avgEl.innerText = (avgSkp % 1 === 0 ? avgSkp : avgSkp.toFixed(1)) + '%';
+    if (avgBar) avgBar.style.width = `${Math.min(100, avgSkp)}%`;
+    if (predEl) {
+      if (totalTasks === 0) predEl.innerText = "Belum Ada Agenda";
+      else if (avgSkp >= 90) predEl.innerText = "Predikat: Sangat Baik";
+      else if (avgSkp >= 75) predEl.innerText = "Predikat: Baik";
+      else predEl.innerText = "Progres Berjalan";
+    }
+    if (totEl) totEl.innerText = totalTasks;
+    if (doneEl) doneEl.innerText = doneTasks;
+    if (ontimeEl) ontimeEl.innerText = onTimeRate + '%';
+
+    // Podium Top 3 (Urutan visual: #2 Kiri, #1 Tengah Tinggi, #3 Kanan)
+    const podiumBox = document.getElementById('pub-podium-box');
+    if (podiumBox && sorted.length >= 3) {
+      const podiumOrder = [
+        { data: sorted[1], rank: 2, height: "h-24", ring: "ring-slate-300 bg-slate-200 text-slate-800", card: "bg-slate-50 border-slate-200", badge: "bg-slate-600 text-white", crown: false },
+        { data: sorted[0], rank: 1, height: "h-28", ring: "ring-amber-400 bg-amber-400 text-slate-950", card: "bg-gradient-to-b from-amber-50 to-emerald-50/70 border-amber-300 shadow-xs", badge: "bg-amber-400 text-slate-950", crown: true },
+        { data: sorted[2], rank: 3, height: "h-20", ring: "ring-amber-600/40 bg-amber-600 text-white", card: "bg-orange-50/40 border-orange-200/80", badge: "bg-amber-700 text-white", crown: false }
+      ];
+
+      podiumBox.innerHTML = podiumOrder.map(p => {
+        const d = p.data;
+        const sc = d.score % 1 === 0 ? d.score : d.score.toFixed(1);
+        const shortName = d.nama.replace(/^(Drs\.\s*H\.\s*)/i, '').split(',')[0].split(' ').slice(0, 2).join(' ');
+        return `
+          <div class="flex flex-col items-center text-center">
+            <div class="relative mb-1.5">
+              ${p.crown ? '<i class="fa-solid fa-crown text-amber-400 text-xs absolute -top-3.5 left-1/2 -translate-x-1/2 drop-shadow-xs"></i>' : ''}
+              <div class="w-10 h-10 rounded-full ${p.ring} ring-2 font-extrabold text-sm flex items-center justify-center shadow-xs">
+                ${d.nama.charAt(0)}
+              </div>
+              <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full ${p.badge} text-[9px] font-extrabold flex items-center justify-center shadow">
+                ${p.rank}
+              </span>
+            </div>
+            <p class="font-extrabold text-[10px] text-slate-800 line-clamp-1 w-full px-0.5">${shortName}</p>
+            <p class="text-[8px] text-slate-500 line-clamp-1 w-full mb-1">${d.jabatan}</p>
+            <div class="w-full ${p.height} ${p.card} border rounded-t-xl p-1.5 flex flex-col justify-center items-center">
+              <span class="font-extrabold text-xs text-gov-800">${sc}%</span>
+              <span class="text-[8px] text-slate-500 mt-0.5">${d.doneCount}/${d.totalCount} Tuntas</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Daftar Lengkap 11 Perangkat Desa
+    const listBox = document.getElementById('pub-skp-list');
+    if (!listBox) return;
+
+    const query = (document.getElementById('pub-search-input')?.value || '').trim().toLowerCase();
+    const mappedWithRank = sorted.map((item, idx) => ({ ...item, rank: idx + 1 }));
+    const filteredList = query
+      ? mappedWithRank.filter(a => a.nama.toLowerCase().includes(query) || a.jabatan.toLowerCase().includes(query))
+      : mappedWithRank;
+
+    if (filteredList.length === 0) {
+      listBox.innerHTML = `<p class="text-center text-xs text-slate-400 py-4">Perangkat desa tidak ditemukan.</p>`;
+      return;
+    }
+
+    listBox.innerHTML = filteredList.map(a => {
+      const sc = a.score % 1 === 0 ? a.score : a.score.toFixed(1);
+      const pred = getPredikatSKP(a.score, a.totalCount);
+      const rankBadge = a.rank === 1
+        ? "bg-amber-400 text-slate-950"
+        : (a.rank === 2 ? "bg-slate-300 text-slate-900" : (a.rank === 3 ? "bg-amber-600 text-white" : "bg-slate-100 text-slate-600 border border-slate-200"));
+
+      return `
+        <div class="border border-slate-200/90 bg-slate-50/60 hover:bg-white rounded-xl p-3 space-y-2 transition">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center space-x-2.5 min-w-0">
+              <span class="w-6 h-6 rounded-lg ${rankBadge} font-extrabold text-[10px] flex items-center justify-center shrink-0">
+                #${a.rank}
+              </span>
+              <div class="w-8 h-8 rounded-full bg-gov-700 text-white font-extrabold text-xs flex items-center justify-center shrink-0">
+                ${a.nama.charAt(0)}
+              </div>
+              <div class="min-w-0">
+                <h3 class="font-extrabold text-xs text-slate-900 truncate">${a.nama}</h3>
+                <p class="text-[10px] text-slate-500 font-medium truncate">${a.jabatan}</p>
+              </div>
+            </div>
+
+            <div class="text-right shrink-0">
+              <span class="font-extrabold text-sm ${pred.text}">${sc}%</span>
+              <span class="block text-[8px] font-bold px-1.5 py-0.2 rounded border ${pred.badge} mt-0.5">
+                ${pred.label}
+              </span>
+            </div>
+          </div>
+
+          <div class="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden">
+            <div class="${pred.bar} h-2 rounded-full transition-all duration-500" style="width: ${Math.min(100, a.score)}%"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-[10px] text-slate-500 pt-0.5">
+            <span>
+              <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>
+              Tuntas: <strong class="text-slate-700">${a.doneCount}</strong> dari <strong class="text-slate-700">${a.totalCount}</strong> tugas
+            </span>
+            <span>
+              <i class="fa-regular fa-clock text-slate-400 mr-1"></i>
+              Kecepatan: <strong class="text-slate-700">${a.durasi}</strong>
+            </span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ==============================================================
+  // NAVIGASI TAB & RUANG KERJA INTERNAL
+  // ==============================================================
   function switchTab(tabName) {
     ['tugas', 'alur', 'capaian', 'monitoring'].forEach(t => {
       const v = document.getElementById('view-' + t);
@@ -666,12 +1123,13 @@
 
     if (tabName === 'alur') renderAlurView(activeTaskId);
     else if (tabName === 'tugas') renderUserTaskList();
+    else if (tabName === 'capaian') renderCapaianSKP();
     else if (tabName === 'monitoring') renderMonitoringView();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Filter Tugas Akun Aktif (tanpa data palsu saat kosong)
   function getUserTasks() {
+    if (!currentUser) return [];
     const nameLower = currentUser.nama.toLowerCase();
     return TASKS.filter(t => {
       const assigneeLower = (t.assignee || '').toLowerCase();
@@ -681,6 +1139,7 @@
 
   // Render Tab 1: Tugas Saya
   function renderUserTaskList() {
+    if (!currentUser) return;
     const container = document.getElementById('user-task-list');
     const tasks = getUserTasks();
 
@@ -744,8 +1203,8 @@
             </div>
 
             <div class="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-xs">
-              <span class="text-[9px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${t.deadline}</span>
-              <div class="flex items-center space-x-1.5">
+              <span class="text-[9px] text-slate-400 truncate max-w-[165px]"><i class="fa-regular fa-clock mr-1"></i>${t.deadline}</span>
+              <div class="flex items-center space-x-1.5 shrink-0">
                 <button onclick="bukaUnitDetailModal(${t.id})" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[9px] font-bold px-2 py-0.5 rounded flex items-center space-x-1">
                   <i class="fa-solid fa-folder-open text-[8px]"></i><span>Unit Detail</span>
                 </button>
@@ -783,6 +1242,7 @@
   }
 
   function renderAlurView(selectedId = null) {
+    if (!currentUser) return;
     const tasks = getUserTasks();
     const sel = document.getElementById('alur-task-select');
     const stepperBox = document.getElementById('alur-stepper-box');
@@ -913,6 +1373,9 @@
       t.stage = currentStage + 1;
       t.progress = (t.stage * 20) + '%';
       t.hasProof = true;
+      if (t.stage === 5 && !t.completedAt) {
+        t.completedAt = Date.now();
+      }
       t.lastUpdated = "Baru saja (" + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB)";
 
       const noteVal = document.getElementById('alur-note')?.value;
@@ -928,9 +1391,7 @@
       });
 
       syncSingleTaskToCloud(t);
-      renderAlurView(t.id);
-      renderUserTaskList();
-      renderMonitoringView();
+      refreshAllViews();
       showToast(`Sukses! Tahap ${t.stage} (${t.progress}) tersimpan permanen!`);
     } else {
       showToast("Tugas sudah selesai 100% dan terverifikasi penuh.");
@@ -946,6 +1407,11 @@
     t.stage = Number(stepNum);
     t.progress = (t.stage * 20) + '%';
     t.hasProof = true;
+    if (t.stage === 5 && !t.completedAt) {
+      t.completedAt = Date.now();
+    } else if (t.stage < 5) {
+      t.completedAt = null;
+    }
     t.lastUpdated = "Baru saja (" + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB)";
 
     const note = `Pelaksana beralih ke Tahap ${t.stage}: ${SOP_STEPS[t.stage - 1].title}`;
@@ -958,9 +1424,7 @@
     });
 
     syncSingleTaskToCloud(t);
-    renderAlurView(t.id);
-    renderUserTaskList();
-    renderMonitoringView();
+    refreshAllViews();
     showToast(`Beralih ke Tahap ${t.stage} & tersimpan.`);
   }
 
@@ -985,15 +1449,14 @@
         stage: Number(t.stage) || 1
       });
       syncSingleTaskToCloud(t);
-      renderAlurView(t.id);
-      renderMonitoringView();
+      refreshAllViews();
       showToast("Catatan tersimpan permanen ke riwayat alur.");
     } else {
       showToast("Ketikkan catatan terlebih dahulu.");
     }
   }
 
-  // Kompresi otomatis agar selalu di bawah 42.000 karakter (aman untuk batas sel Google Sheets 50.000 karakter)
+  // Kompresi foto otomatis (< 42.000 karakter)
   function compressImageToDataURL(file, maxWidth = 540, quality = 0.6) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -1071,11 +1534,8 @@
         stage: Number(t.stage) || 1
       });
 
-      // Tampilkan langsung di layar sebelum sinkronisasi cloud selesai
       saveTasksToLocal();
-      renderAlurView(t.id);
-      renderUserTaskList();
-      renderMonitoringView();
+      refreshAllViews();
 
       await syncSingleTaskToCloud(t);
       showToast(`Foto "${file.name}" berhasil disimpan!`);
@@ -1085,6 +1545,57 @@
     } finally {
       fileInput.value = '';
     }
+  }
+
+  // ==============================================================
+  // TAB 3: CAPAIAN SKP INTERNAL
+  // ==============================================================
+  function renderCapaianSKP() {
+    if (!currentUser) return;
+    const sorted = hitungStatistikSKP();
+    const myIdx = sorted.findIndex(a => a.id === currentUser.id);
+    const me = myIdx !== -1 ? sorted[myIdx] : { score: 0, durasi: "-", doneCount: 0, totalCount: 0, onTimeCount: 0 };
+
+    const capAvatar = document.getElementById('cap-avatar');
+    const capNama = document.getElementById('cap-nama');
+    const capSummary = document.getElementById('cap-task-summary');
+    const skpScore = document.getElementById('skp-score');
+    const skpDurasi = document.getElementById('skp-durasi');
+    const skpRank = document.getElementById('skp-rank');
+
+    if (capAvatar) capAvatar.innerText = currentUser.nama.charAt(0);
+    if (capNama) capNama.innerText = currentUser.nama;
+    if (capSummary) {
+      const slaInfo = me.doneCount > 0 ? ` • ${me.onTimeCount}/${me.doneCount} Tepat Waktu` : '';
+      capSummary.innerText = `${me.doneCount} Tuntas dari ${me.totalCount} Tugas${slaInfo}`;
+    }
+    if (skpScore) skpScore.innerText = (me.score % 1 === 0 ? me.score : me.score.toFixed(1)) + '%';
+    if (skpDurasi) skpDurasi.innerText = me.durasi;
+    if (skpRank) skpRank.innerHTML = `#${myIdx + 1} <span class="text-[9px] font-normal text-emerald-200">/ ${APARATUR.length}</span>`;
+
+    const box = document.getElementById('leaderboard-box');
+    if (!box) return;
+
+    box.innerHTML = sorted.map((a, idx) => {
+      const displayScore = a.score % 1 === 0 ? a.score : a.score.toFixed(1);
+      return `
+        <div class="flex items-center justify-between p-2 rounded-xl border ${a.id === currentUser.id ? 'bg-emerald-50 border-emerald-400' : 'bg-slate-50 border-slate-200'} text-xs">
+          <div class="flex items-center space-x-2 min-w-0">
+            <span class="w-5 h-5 rounded-full shrink-0 flex items-center justify-center font-bold text-[9px] ${idx === 0 ? 'bg-amber-400 text-slate-900' : (idx === 1 ? 'bg-slate-300 text-slate-800' : (idx === 2 ? 'bg-amber-600 text-white' : 'bg-slate-200 text-slate-600'))}">
+              ${idx + 1}
+            </span>
+            <div class="min-w-0">
+              <p class="font-bold text-[11px] text-slate-800 truncate">${a.nama} ${a.id === currentUser.id ? '<span class="text-[8px] bg-gov-700 text-white px-1 py-0.2 rounded font-normal">Anda</span>' : ''}</p>
+              <p class="text-[9px] text-slate-500 truncate">${a.jabatan} • <span class="text-gov-700 font-semibold">${a.doneCount}/${a.totalCount} Tuntas</span></p>
+            </div>
+          </div>
+          <div class="text-right shrink-0 ml-2">
+            <span class="font-extrabold text-gov-800 text-[11px]">${displayScore}%</span>
+            <p class="text-[8px] text-slate-400">Rata-rata: ${a.durasi}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   // ==============================================================
@@ -1130,6 +1641,7 @@
   }
 
   function renderMonitoringView() {
+    if (!currentUser) return;
     const container = document.getElementById('mon-task-list');
     if (!container) return;
 
@@ -1254,6 +1766,7 @@
   let inspectedTaskId = null;
 
   function bukaUnitDetailModal(taskId) {
+    if (!currentUser) return;
     inspectedTaskId = Number(taskId);
     const t = TASKS.find(x => Number(x.id) === inspectedTaskId);
     if (!t) return;
@@ -1391,6 +1904,7 @@
     if (!t) return;
     t.stage = 5;
     t.progress = "100%";
+    if (!t.completedAt) t.completedAt = Date.now();
     t.lastUpdated = "Hari ini (" + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB)";
     if (!Array.isArray(t.history)) t.history = [];
     t.history.push({
@@ -1401,9 +1915,7 @@
     });
 
     syncSingleTaskToCloud(t);
-    renderUserTaskList();
-    renderAlurView(activeTaskId);
-    renderMonitoringView();
+    refreshAllViews();
     bukaUnitDetailModal(taskId);
     showToast(`Pengesahan sukses! Tugas ${t.code} dinyatakan 100% tuntas.`);
   }
@@ -1426,12 +1938,12 @@
       stage: Number(t.stage) || 1
     });
     syncSingleTaskToCloud(t);
-    renderMonitoringView();
+    refreshAllViews();
     bukaUnitDetailModal(taskId);
     showToast("Feedback pimpinan berhasil disimpan!");
   }
 
-  // Switch Akun Cepat
+  // Switch Akun / Masuk ke Mode Aparatur
   function switchAparatur(targetId) {
     const target = APARATUR.find(a => a.id === targetId);
     if (!target) return;
@@ -1441,19 +1953,13 @@
     const userTasks = getUserTasks();
     activeTaskId = userTasks.length > 0 ? Number(userTasks[0].id) : null;
 
-    updateHeaderUI();
-    renderAparaturModal();
-    renderUserTaskList();
-    renderAlurView(activeTaskId);
-    renderLeaderboard();
-    renderMonitoringView();
-    checkRoleAccess();
-    updateQuickRoleButtons();
-
+    applyAppMode();
+    switchTab('tugas');
     showToast(`Mode Aktif: ${currentUser.nama} (${currentUser.jabatan})`);
   }
 
   function updateQuickRoleButtons() {
+    if (!currentUser) return;
     const bSekdes = document.getElementById('btn-role-sekdes');
     const bNaning = document.getElementById('btn-role-naning');
     const bKasun = document.getElementById('btn-role-kasun');
@@ -1469,28 +1975,16 @@
   }
 
   function updateHeaderUI() {
+    if (!currentUser) return;
     document.getElementById('hdr-role-badge').innerText = currentUser.badge;
     document.getElementById('hdr-jabatan').innerText = currentUser.jabatan;
     document.getElementById('hdr-nama').innerText = currentUser.nama;
     document.getElementById('hdr-avatar').innerText = currentUser.nama.charAt(0);
-
-    const capAvatar = document.getElementById('cap-avatar');
-    const capNama = document.getElementById('cap-nama');
-    const skpScore = document.getElementById('skp-score');
-    const skpDurasi = document.getElementById('skp-durasi');
-    const skpRank = document.getElementById('skp-rank');
-
-    if (capAvatar) capAvatar.innerText = currentUser.nama.charAt(0);
-    if (capNama) capNama.innerText = currentUser.nama;
-    if (skpScore) skpScore.innerText = currentUser.score + '%';
-    if (skpDurasi) skpDurasi.innerText = currentUser.durasi;
-
-    const sorted = [...APARATUR].sort((a, b) => b.score - a.score);
-    const rank = sorted.findIndex(a => a.id === currentUser.id) + 1;
-    if (skpRank) skpRank.innerHTML = `#${rank} <span class="text-[9px] font-normal text-emerald-200">/ 11</span>`;
+    renderCapaianSKP();
   }
 
   function checkRoleAccess() {
+    if (!currentUser) return;
     const leaderView = document.getElementById('mon-leader-container');
     const lockedView = document.getElementById('mon-locked-container');
     if (currentUser.isLeader) {
@@ -1502,64 +1996,20 @@
     }
   }
 
-  function bukaModalGantiAkun() { document.getElementById('modal-ganti-akun').classList.remove('hidden'); }
+  function bukaModalGantiAkun() {
+    renderAparaturModal();
+    document.getElementById('modal-ganti-akun').classList.remove('hidden');
+  }
   function tutupModalGantiAkun() { document.getElementById('modal-ganti-akun').classList.add('hidden'); }
 
   // Formulir Buat Tugas
-  // Helper konversi datetime-local (YYYY-MM-DDTHH:mm) ke format Indonesia & timestamp
-  function parseDeadlineInput(val) {
-    if (!val) {
-      const fallback = new Date();
-      fallback.setHours(16, 0, 0, 0);
-      return {
-        text: formatTanggalJam(fallback),
-        ms: fallback.getTime()
-      };
-    }
-    const [datePart, timePart] = val.split('T');
-    const [y, m, d] = datePart.split('-').map(Number);
-    const [hh, mm] = (timePart || '15:00').split(':').map(Number);
-    const dt = new Date(y, m - 1, d, hh, mm, 0, 0);
-    return {
-      text: formatTanggalJam(dt),
-      ms: dt.getTime()
-    };
-  }
-
-  function formatTanggalJam(dt) {
-    const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    const namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const jam = String(dt.getHours()).padStart(2, '0');
-    const menit = String(dt.getMinutes()).padStart(2, '0');
-    return `${namaHari[dt.getDay()]}, ${dt.getDate()} ${namaBulan[dt.getMonth()]} ${dt.getFullYear()}, ${jam}.${menit} WIB`;
-  }
-
-  // Fallback pembaca timestamp jika tugas dimuat ulang dari Google Sheets
-  function getDeadlineMs(t) {
-    if (t.deadlineAt && !isNaN(Number(t.deadlineAt))) return Number(t.deadlineAt);
-    if (!t.deadline) return null;
-
-    const bulanMap = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, Mei: 4, Jun: 5, Jul: 6, Agu: 7, Sep: 8, Okt: 9, Nov: 10, Des: 11 };
-    const match = t.deadline.match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})(?:,\s*(\d{2})\.(\d{2}))?/);
-    if (match) {
-      const tgl = parseInt(match[1], 10);
-      const bln = bulanMap[match[2]] ?? 0;
-      const thn = parseInt(match[3], 10);
-      const jam = match[4] ? parseInt(match[4], 10) : 16;
-      const mnt = match[5] ? parseInt(match[5], 10) : 0;
-      return new Date(thn, bln, tgl, jam, mnt, 0, 0).getTime();
-    }
-    return null;
-  }
-
-  // Formulir Buat Tugas
   function bukaModalBuatTugas() {
+    if (!currentUser) return;
     const modal = document.getElementById('modal-buat-tugas');
     const sourceSelect = document.getElementById('select-task-source');
     const banner = document.getElementById('banner-form-non-atasan');
     const deadlineInput = document.getElementById('input-task-deadline');
 
-    // Default otomatis: hari ini jam 15:00 (jika sudah lewat jam 15:00, otomatis besok jam 15:00)
     if (deadlineInput) {
       const target = new Date();
       if (target.getHours() >= 15) {
@@ -1592,6 +2042,7 @@
   function tutupModalBuatTugas() { document.getElementById('modal-buat-tugas').classList.add('hidden'); }
 
   function handleFormSourceChange() {
+    if (!currentUser) return;
     const source = document.getElementById('select-task-source').value;
     const assigneeSelect = document.getElementById('select-task-assignee');
     const lockedLabel = document.getElementById('label-assignee-locked');
@@ -1617,6 +2068,7 @@
   }
 
   function simpanTugasBaru() {
+    if (!currentUser) return;
     const title = document.getElementById('input-task-title').value;
     if (!title || !title.trim()) {
       showToast("Judul tugas wajib diisi!");
@@ -1676,132 +2128,9 @@
     document.getElementById('input-task-desc').value = '';
     syncSingleTaskToCloud(newTask);
     tutupModalBuatTugas();
-    renderUserTaskList();
-    renderAlurView(activeTaskId);
-    renderMonitoringView();
+    refreshAllViews();
     showToast(`Tugas baru berhasil disimpan & dikirim ke: ${assignee}!`);
   }
-    
- // ==============================================================
-  // TAB 3: CAPAIAN SKP (OTOMATIS DARI DATA MONITORING / TASKS)
-  // ==============================================================
-  function hitungStatistikSKP() {
-    const now = Date.now();
-
-    const hasil = APARATUR.map(a => {
-      const nameLower = a.nama.toLowerCase();
-      const myTasks = TASKS.filter(t => {
-        const assigneeLower = (t.assignee || '').toLowerCase();
-        return assigneeLower.includes(nameLower) || nameLower.includes(assigneeLower);
-      });
-
-      const totalCount = myTasks.length;
-      const doneTasks = myTasks.filter(t => Number(t.stage) === 5);
-      const doneCount = doneTasks.length;
-
-      // Indeks SKP = rata-rata persentase tahap (Tahap 1=20% s/d Tahap 5=100%)
-      let score = 0;
-      if (totalCount > 0) {
-        const totalPersen = myTasks.reduce((acc, t) => {
-          const st = Math.min(5, Math.max(1, Number(t.stage) || 1));
-          return acc + (st * 20);
-        }, 0);
-        score = Number((totalPersen / totalCount).toFixed(1));
-      }
-
-      // Rata-rata waktu penyelesaian untuk tugas yang sudah Tahap 5 (100%)
-      let durasi = "-";
-      if (doneCount > 0) {
-        let totalHari = 0;
-        doneTasks.forEach(t => {
-          if (!t.completedAt) t.completedAt = now;
-          const createdMs = Number(t.id);
-          if (createdMs > 1700000000000 && t.completedAt >= createdMs) {
-            const diffHari = (t.completedAt - createdMs) / (1000 * 60 * 60 * 24);
-            totalHari += Math.max(0.1, diffHari);
-          } else {
-            totalHari += 1.0;
-          }
-        });
-        durasi = (totalHari / doneCount).toFixed(1) + " Hari";
-      }
-
-      return {
-        ...a,
-        totalCount,
-        doneCount,
-        score,
-        durasi
-      };
-    });
-
-    // Urutkan berdasarkan Indeks SKP tertinggi -> Tugas Tuntas terbanyak -> Total Tugas
-    hasil.sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      if (b.doneCount !== a.doneCount) return b.doneCount - a.doneCount;
-      if (b.totalCount !== a.totalCount) return b.totalCount - a.totalCount;
-      return a.id - b.id;
-    });
-
-    return hasil;
-  }
-
-  function renderCapaianSKP() {
-    const sorted = hitungStatistikSKP();
-    const myIdx = sorted.findIndex(a => a.id === currentUser.id);
-    const me = myIdx !== -1 ? sorted[myIdx] : { score: 0, durasi: "-", doneCount: 0, totalCount: 0 };
-
-    const capAvatar = document.getElementById('cap-avatar');
-    const capNama = document.getElementById('cap-nama');
-    const capSummary = document.getElementById('cap-task-summary');
-    const skpScore = document.getElementById('skp-score');
-    const skpDurasi = document.getElementById('skp-durasi');
-    const skpRank = document.getElementById('skp-rank');
-
-    if (capAvatar) capAvatar.innerText = currentUser.nama.charAt(0);
-    if (capNama) capNama.innerText = currentUser.nama;
-    if (capSummary) capSummary.innerText = `${me.doneCount} Tuntas dari ${me.totalCount} Tugas`;
-    if (skpScore) skpScore.innerText = (me.score % 1 === 0 ? me.score : me.score.toFixed(1)) + '%';
-    if (skpDurasi) skpDurasi.innerText = me.durasi;
-    if (skpRank) skpRank.innerHTML = `#${myIdx + 1} <span class="text-[9px] font-normal text-emerald-200">/ ${APARATUR.length}</span>`;
-
-    const box = document.getElementById('leaderboard-box');
-    if (!box) return;
-
-    box.innerHTML = sorted.map((a, idx) => {
-      const displayScore = a.score % 1 === 0 ? a.score : a.score.toFixed(1);
-      return `
-        <div class="flex items-center justify-between p-2 rounded-xl border ${a.id === currentUser.id ? 'bg-emerald-50 border-emerald-400' : 'bg-slate-50 border-slate-200'} text-xs">
-          <div class="flex items-center space-x-2 min-w-0">
-            <span class="w-5 h-5 rounded-full shrink-0 flex items-center justify-center font-bold text-[9px] ${idx === 0 ? 'bg-amber-400 text-slate-900' : (idx === 1 ? 'bg-slate-300 text-slate-800' : (idx === 2 ? 'bg-amber-600 text-white' : 'bg-slate-200 text-slate-600'))}">
-              ${idx + 1}
-            </span>
-            <div class="min-w-0">
-              <p class="font-bold text-[11px] text-slate-800 truncate">${a.nama} ${a.id === currentUser.id ? '<span class="text-[8px] bg-gov-700 text-white px-1 py-0.2 rounded font-normal">Anda</span>' : ''}</p>
-              <p class="text-[9px] text-slate-500 truncate">${a.jabatan} • <span class="text-gov-700 font-semibold">${a.doneCount}/${a.totalCount} Tuntas</span></p>
-            </div>
-          </div>
-          <div class="text-right shrink-0 ml-2">
-            <span class="font-extrabold text-gov-800 text-[11px]">${displayScore}%</span>
-            <p class="text-[8px] text-slate-400">Rata-rata: ${a.durasi}</p>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  // Alias agar pemanggilan renderLeaderboard() & updateHeaderUI() tetap otomatis menyinkronkan SKP
-  const renderLeaderboard = renderCapaianSKP;
-  const _origUpdateHeaderUI = updateHeaderUI;
-  updateHeaderUI = function() {
-    _origUpdateHeaderUI();
-    renderCapaianSKP();
-  };
-  const _origRenderMonitoringView = renderMonitoringView;
-  renderMonitoringView = function() {
-    _origRenderMonitoringView();
-    renderCapaianSKP();
-  };
 
   // Toast Helper
   function showToast(msg) {
@@ -1836,7 +2165,6 @@
     document.getElementById('pin-target-avatar').innerText = targetAparatur.nama.charAt(0); 
     document.getElementById('pin-target-jabatan').innerText = targetAparatur.jabatan; 
     document.getElementById('pin-target-nama').innerText = targetAparatur.nama; 
-    document.getElementById('pin-hint-text').innerText = targetAparatur.pin; 
     document.getElementById('pin-error-msg').classList.add('hidden'); 
     updatePinDots(); 
     document.getElementById('modal-pin-auth').classList.remove('hidden'); 
@@ -1905,6 +2233,7 @@
   } 
 
   function kunciAkunSekarang() { 
+    if (!currentUser) return;
     bukaModalPin(currentUser); 
     showToast('Sesi dikunci. Masukkan PIN 6 digit untuk melanjutkan.'); 
   } 
@@ -1912,8 +2241,9 @@
   function renderAparaturModal() { 
     const box = document.getElementById('modal-aparatur-list'); 
     if (!box) return; 
+    const activeId = currentUser ? currentUser.id : null;
     box.innerHTML = APARATUR.map(a => `
-      <div onclick="pilihAparaturDenganPin(${a.id});" class="flex items-center justify-between p-2 rounded-xl border ${a.id === currentUser.id ? 'bg-emerald-50 border-emerald-500 ring-1 ring-emerald-500' : 'bg-white border-slate-200'} hover:bg-slate-50 cursor-pointer transition">
+      <div onclick="pilihAparaturDenganPin(${a.id});" class="flex items-center justify-between p-2 rounded-xl border ${a.id === activeId ? 'bg-emerald-50 border-emerald-500 ring-1 ring-emerald-500' : 'bg-white border-slate-200'} hover:bg-slate-50 cursor-pointer transition">
         <div class="flex items-center space-x-2">
           <div class="w-6 h-6 rounded-full bg-gov-700 text-white font-bold text-xs flex items-center justify-center">${a.nama.charAt(0)}</div>
           <div>
@@ -1922,7 +2252,7 @@
           </div>
         </div>
         <div class="flex items-center space-x-1">
-          ${a.id === currentUser.id ? '<span class="text-[8px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">Aktif</span>' : '<span class="text-[8px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full font-semibold flex items-center"><i class="fa-solid fa-lock text-[7px] mr-1 text-slate-400"></i>PIN</span>'}
+          ${a.id === activeId ? '<span class="text-[8px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">Aktif</span>' : '<span class="text-[8px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full font-semibold flex items-center"><i class="fa-solid fa-lock text-[7px] mr-1 text-slate-400"></i>Masuk</span>'}
         </div>
       </div>
     `).join(''); 
@@ -1970,10 +2300,7 @@
       activeTaskId = remainingUserTasks.length > 0 ? Number(remainingUserTasks[0].id) : null; 
     } 
     
-    renderUserTaskList(); 
-    renderAlurView(activeTaskId); 
-    renderMonitoringView(); 
-    if (typeof renderLeaderboard === 'function') renderLeaderboard(); 
+    refreshAllViews();
     showToast('Tugas berhasil dihapus permanen.'); 
   } 
 
@@ -1995,9 +2322,8 @@
   });
 
   function setupPWAInstallButton() {
-    const installBtn = document.querySelector('button[onclick*="Aplikasi siap diinstal"]');
+    const installBtn = document.getElementById('btn-public-install');
     if (installBtn) {
-      installBtn.removeAttribute('onclick');
       installBtn.addEventListener('click', async () => {
         if (deferredInstallPrompt) {
           deferredInstallPrompt.prompt();
