@@ -411,17 +411,17 @@
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block text-[10px] font-bold text-slate-700 mb-1">Prioritas</label>
-            <select id="select-task-priority" class="w-full text-xs border-slate-300 rounded-lg">
-              <option value="Tinggi">Tinggi (Mendesak)</option>
-              <option value="Normal" selected>Normal</option>
-              <option value="Rutin">Rutin</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-[10px] font-bold text-slate-700 mb-1">Tenggat Waktu</label>
-            <input type="text" id="input-task-deadline" placeholder="Besok (15.00 WIB)" class="w-full text-xs border-slate-300 rounded-lg">
-          </div>
+          <label class="block text-[10px] font-bold text-slate-700 mb-1">Prioritas</label>
+          <select id="select-task-priority" class="w-full text-xs border-slate-300 rounded-lg">
+            <option value="Tinggi">Tinggi (Mendesak)</option>
+            <option value="Normal" selected>Normal</option>
+            <option value="Rutin">Rutin</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-slate-700 mb-1">Tenggat Tanggal & Jam Selesai (WIB)</label>
+          <input type="datetime-local" id="input-task-deadline" class="w-full text-xs border-slate-300 rounded-lg focus:ring-gov-700 focus:border-gov-700">
         </div>
 
         <div>
@@ -1506,10 +1506,70 @@
   function tutupModalGantiAkun() { document.getElementById('modal-ganti-akun').classList.add('hidden'); }
 
   // Formulir Buat Tugas
+  // Helper konversi datetime-local (YYYY-MM-DDTHH:mm) ke format Indonesia & timestamp
+  function parseDeadlineInput(val) {
+    if (!val) {
+      const fallback = new Date();
+      fallback.setHours(16, 0, 0, 0);
+      return {
+        text: formatTanggalJam(fallback),
+        ms: fallback.getTime()
+      };
+    }
+    const [datePart, timePart] = val.split('T');
+    const [y, m, d] = datePart.split('-').map(Number);
+    const [hh, mm] = (timePart || '15:00').split(':').map(Number);
+    const dt = new Date(y, m - 1, d, hh, mm, 0, 0);
+    return {
+      text: formatTanggalJam(dt),
+      ms: dt.getTime()
+    };
+  }
+
+  function formatTanggalJam(dt) {
+    const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const jam = String(dt.getHours()).padStart(2, '0');
+    const menit = String(dt.getMinutes()).padStart(2, '0');
+    return `${namaHari[dt.getDay()]}, ${dt.getDate()} ${namaBulan[dt.getMonth()]} ${dt.getFullYear()}, ${jam}.${menit} WIB`;
+  }
+
+  // Fallback pembaca timestamp jika tugas dimuat ulang dari Google Sheets
+  function getDeadlineMs(t) {
+    if (t.deadlineAt && !isNaN(Number(t.deadlineAt))) return Number(t.deadlineAt);
+    if (!t.deadline) return null;
+
+    const bulanMap = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, Mei: 4, Jun: 5, Jul: 6, Agu: 7, Sep: 8, Okt: 9, Nov: 10, Des: 11 };
+    const match = t.deadline.match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})(?:,\s*(\d{2})\.(\d{2}))?/);
+    if (match) {
+      const tgl = parseInt(match[1], 10);
+      const bln = bulanMap[match[2]] ?? 0;
+      const thn = parseInt(match[3], 10);
+      const jam = match[4] ? parseInt(match[4], 10) : 16;
+      const mnt = match[5] ? parseInt(match[5], 10) : 0;
+      return new Date(thn, bln, tgl, jam, mnt, 0, 0).getTime();
+    }
+    return null;
+  }
+
+  // Formulir Buat Tugas
   function bukaModalBuatTugas() {
     const modal = document.getElementById('modal-buat-tugas');
     const sourceSelect = document.getElementById('select-task-source');
     const banner = document.getElementById('banner-form-non-atasan');
+    const deadlineInput = document.getElementById('input-task-deadline');
+
+    // Default otomatis: hari ini jam 15:00 (jika sudah lewat jam 15:00, otomatis besok jam 15:00)
+    if (deadlineInput) {
+      const target = new Date();
+      if (target.getHours() >= 15) {
+        target.setDate(target.getDate() + 1);
+      }
+      const yyyy = target.getFullYear();
+      const mm = String(target.getMonth() + 1).padStart(2, '0');
+      const dd = String(target.getDate()).padStart(2, '0');
+      deadlineInput.value = `${yyyy}-${mm}-${dd}T15:00`;
+    }
 
     if (currentUser.hasSubordinates) {
       banner.classList.add('hidden');
@@ -1566,7 +1626,8 @@
     const source = document.getElementById('select-task-source').value;
     const assignee = document.getElementById('select-task-assignee').value;
     const priority = document.getElementById('select-task-priority').value;
-    const deadline = document.getElementById('input-task-deadline').value || 'Hari ini (17.00 WIB)';
+    const rawDeadline = document.getElementById('input-task-deadline').value;
+    const parsedDeadline = parseDeadlineInput(rawDeadline);
     const desc = document.getElementById('input-task-desc').value || 'Petunjuk dinas resmi.';
 
     let creatorName = currentUser.nama + ` (${currentUser.jabatan})`;
@@ -1574,7 +1635,7 @@
     else if (source === 'notulen') creatorName = `Notulen Rapat Desa`;
 
     const newId = Date.now();
-    const newCode = `TGS-2025-${Math.floor(100 + Math.random() * 900)}`;
+    const newCode = `TGS-2026-${Math.floor(100 + Math.random() * 900)}`;
 
     const newTask = {
       id: newId,
@@ -1584,7 +1645,9 @@
       assignee: assignee,
       category: source,
       priority: priority,
-      deadline: deadline,
+      deadline: parsedDeadline.text,
+      deadlineAt: parsedDeadline.ms,
+      completedAt: null,
       stage: 1,
       progress: "20%",
       desc: desc,
@@ -1598,7 +1661,7 @@
         {
           time: "Hari ini, " + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
           actor: creatorName,
-          note: "Tugas didelegasikan ke " + assignee,
+          note: "Tugas didelegasikan ke " + assignee + " (Tenggat: " + parsedDeadline.text + ")",
           stage: 1
         }
       ]
@@ -1618,7 +1681,7 @@
     renderMonitoringView();
     showToast(`Tugas baru berhasil disimpan & dikirim ke: ${assignee}!`);
   }
-
+    
  // ==============================================================
   // TAB 3: CAPAIAN SKP (OTOMATIS DARI DATA MONITORING / TASKS)
   // ==============================================================
