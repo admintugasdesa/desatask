@@ -210,28 +210,32 @@
           <div>
             <p class="text-[9px] text-emerald-200 uppercase font-bold">Rapor Kinerja Aparatur</p>
             <h3 id="cap-nama" class="font-extrabold text-sm">Naning Lestari</h3>
+            <p id="cap-task-summary" class="text-[10px] text-emerald-200/90 mt-0.5">0 Tuntas dari 0 Tugas</p>
           </div>
         </div>
         <div class="grid grid-cols-3 gap-2 mt-3 pt-2.5 border-t border-white/15 text-center">
           <div>
-            <p id="skp-score" class="font-extrabold text-base text-amber-300">94.2%</p>
+            <p id="skp-score" class="font-extrabold text-base text-amber-300">0%</p>
             <p class="text-[9px] text-emerald-100">Indeks SKP</p>
           </div>
           <div>
-            <p id="skp-durasi" class="font-extrabold text-base">1.4 Hari</p>
+            <p id="skp-durasi" class="font-extrabold text-base">-</p>
             <p class="text-[9px] text-emerald-100">Rata-rata Tuntas</p>
           </div>
           <div>
-            <p id="skp-rank" class="font-extrabold text-base text-emerald-300">#3 <span class="text-[9px] font-normal text-emerald-200">/ 11</span></p>
+            <p id="skp-rank" class="font-extrabold text-base text-emerald-300">#1 <span class="text-[9px] font-normal text-emerald-200">/ 11</span></p>
             <p class="text-[9px] text-emerald-100">Peringkat Desa</p>
           </div>
         </div>
       </div>
 
       <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-xs space-y-2">
-        <h3 class="font-extrabold text-xs text-slate-800 flex items-center">
-          <i class="fa-solid fa-trophy text-amber-500 mr-1.5"></i>Peringkat Kinerja 11 Aparatur Pemdes
-        </h3>
+        <div class="flex items-center justify-between">
+          <h3 class="font-extrabold text-xs text-slate-800 flex items-center">
+            <i class="fa-solid fa-trophy text-amber-500 mr-1.5"></i>Peringkat Kinerja 11 Aparatur Pemdes
+          </h3>
+          <span class="text-[9px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-bold">Sync Monitoring</span>
+        </div>
         <div id="leaderboard-box" class="space-y-1.5"></div>
       </div>
     </section>
@@ -1615,28 +1619,126 @@
     showToast(`Tugas baru berhasil disimpan & dikirim ke: ${assignee}!`);
   }
 
-  // Tab Capaian
-  function renderLeaderboard() {
+ // ==============================================================
+  // TAB 3: CAPAIAN SKP (OTOMATIS DARI DATA MONITORING / TASKS)
+  // ==============================================================
+  function hitungStatistikSKP() {
+    const now = Date.now();
+
+    const hasil = APARATUR.map(a => {
+      const nameLower = a.nama.toLowerCase();
+      const myTasks = TASKS.filter(t => {
+        const assigneeLower = (t.assignee || '').toLowerCase();
+        return assigneeLower.includes(nameLower) || nameLower.includes(assigneeLower);
+      });
+
+      const totalCount = myTasks.length;
+      const doneTasks = myTasks.filter(t => Number(t.stage) === 5);
+      const doneCount = doneTasks.length;
+
+      // Indeks SKP = rata-rata persentase tahap (Tahap 1=20% s/d Tahap 5=100%)
+      let score = 0;
+      if (totalCount > 0) {
+        const totalPersen = myTasks.reduce((acc, t) => {
+          const st = Math.min(5, Math.max(1, Number(t.stage) || 1));
+          return acc + (st * 20);
+        }, 0);
+        score = Number((totalPersen / totalCount).toFixed(1));
+      }
+
+      // Rata-rata waktu penyelesaian untuk tugas yang sudah Tahap 5 (100%)
+      let durasi = "-";
+      if (doneCount > 0) {
+        let totalHari = 0;
+        doneTasks.forEach(t => {
+          if (!t.completedAt) t.completedAt = now;
+          const createdMs = Number(t.id);
+          if (createdMs > 1700000000000 && t.completedAt >= createdMs) {
+            const diffHari = (t.completedAt - createdMs) / (1000 * 60 * 60 * 24);
+            totalHari += Math.max(0.1, diffHari);
+          } else {
+            totalHari += 1.0;
+          }
+        });
+        durasi = (totalHari / doneCount).toFixed(1) + " Hari";
+      }
+
+      return {
+        ...a,
+        totalCount,
+        doneCount,
+        score,
+        durasi
+      };
+    });
+
+    // Urutkan berdasarkan Indeks SKP tertinggi -> Tugas Tuntas terbanyak -> Total Tugas
+    hasil.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      if (b.doneCount !== a.doneCount) return b.doneCount - a.doneCount;
+      if (b.totalCount !== a.totalCount) return b.totalCount - a.totalCount;
+      return a.id - b.id;
+    });
+
+    return hasil;
+  }
+
+  function renderCapaianSKP() {
+    const sorted = hitungStatistikSKP();
+    const myIdx = sorted.findIndex(a => a.id === currentUser.id);
+    const me = myIdx !== -1 ? sorted[myIdx] : { score: 0, durasi: "-", doneCount: 0, totalCount: 0 };
+
+    const capAvatar = document.getElementById('cap-avatar');
+    const capNama = document.getElementById('cap-nama');
+    const capSummary = document.getElementById('cap-task-summary');
+    const skpScore = document.getElementById('skp-score');
+    const skpDurasi = document.getElementById('skp-durasi');
+    const skpRank = document.getElementById('skp-rank');
+
+    if (capAvatar) capAvatar.innerText = currentUser.nama.charAt(0);
+    if (capNama) capNama.innerText = currentUser.nama;
+    if (capSummary) capSummary.innerText = `${me.doneCount} Tuntas dari ${me.totalCount} Tugas`;
+    if (skpScore) skpScore.innerText = (me.score % 1 === 0 ? me.score : me.score.toFixed(1)) + '%';
+    if (skpDurasi) skpDurasi.innerText = me.durasi;
+    if (skpRank) skpRank.innerHTML = `#${myIdx + 1} <span class="text-[9px] font-normal text-emerald-200">/ ${APARATUR.length}</span>`;
+
     const box = document.getElementById('leaderboard-box');
-    const sorted = [...APARATUR].sort((a, b) => b.score - a.score);
-    box.innerHTML = sorted.map((a, idx) => `
-      <div class="flex items-center justify-between p-2 rounded-xl border ${a.id === currentUser.id ? 'bg-emerald-50 border-emerald-400' : 'bg-slate-50 border-slate-200'} text-xs">
-        <div class="flex items-center space-x-2">
-          <span class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-[9px] ${idx === 0 ? 'bg-amber-400 text-slate-900' : (idx === 1 ? 'bg-slate-300 text-slate-800' : (idx === 2 ? 'bg-amber-600 text-white' : 'bg-slate-200 text-slate-600'))}">
-            ${idx + 1}
-          </span>
-          <div>
-            <p class="font-bold text-[11px] text-slate-800">${a.nama} ${a.id === currentUser.id ? '<span class="text-[8px] bg-gov-700 text-white px-1 py-0.2 rounded font-normal">Anda</span>' : ''}</p>
-            <p class="text-[9px] text-slate-500">${a.jabatan}</p>
+    if (!box) return;
+
+    box.innerHTML = sorted.map((a, idx) => {
+      const displayScore = a.score % 1 === 0 ? a.score : a.score.toFixed(1);
+      return `
+        <div class="flex items-center justify-between p-2 rounded-xl border ${a.id === currentUser.id ? 'bg-emerald-50 border-emerald-400' : 'bg-slate-50 border-slate-200'} text-xs">
+          <div class="flex items-center space-x-2 min-w-0">
+            <span class="w-5 h-5 rounded-full shrink-0 flex items-center justify-center font-bold text-[9px] ${idx === 0 ? 'bg-amber-400 text-slate-900' : (idx === 1 ? 'bg-slate-300 text-slate-800' : (idx === 2 ? 'bg-amber-600 text-white' : 'bg-slate-200 text-slate-600'))}">
+              ${idx + 1}
+            </span>
+            <div class="min-w-0">
+              <p class="font-bold text-[11px] text-slate-800 truncate">${a.nama} ${a.id === currentUser.id ? '<span class="text-[8px] bg-gov-700 text-white px-1 py-0.2 rounded font-normal">Anda</span>' : ''}</p>
+              <p class="text-[9px] text-slate-500 truncate">${a.jabatan} • <span class="text-gov-700 font-semibold">${a.doneCount}/${a.totalCount} Tuntas</span></p>
+            </div>
+          </div>
+          <div class="text-right shrink-0 ml-2">
+            <span class="font-extrabold text-gov-800 text-[11px]">${displayScore}%</span>
+            <p class="text-[8px] text-slate-400">Rata-rata: ${a.durasi}</p>
           </div>
         </div>
-        <div class="text-right">
-          <span class="font-extrabold text-gov-800 text-[11px]">${a.score}%</span>
-          <p class="text-[8px] text-slate-400">Rata-rata: ${a.durasi}</p>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
+
+  // Alias agar pemanggilan renderLeaderboard() & updateHeaderUI() tetap otomatis menyinkronkan SKP
+  const renderLeaderboard = renderCapaianSKP;
+  const _origUpdateHeaderUI = updateHeaderUI;
+  updateHeaderUI = function() {
+    _origUpdateHeaderUI();
+    renderCapaianSKP();
+  };
+  const _origRenderMonitoringView = renderMonitoringView;
+  renderMonitoringView = function() {
+    _origRenderMonitoringView();
+    renderCapaianSKP();
+  };
 
   // Toast Helper
   function showToast(msg) {
